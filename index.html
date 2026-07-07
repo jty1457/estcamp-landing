@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이스트캠프 가디언즈 인프라보안 14기 | 정보보호 및 보안 인프라 운영 관리</title>
+<meta name="description" content="이스트소프트 전현직 인프라 보안 실무자가 설계한 진짜 현업 과정. 1,300만원 이상 지원, 100% 실시간 비대면, 수료 후 KDT 인턴십까지. 가디언즈 14기 모집.">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   컬러톤: 이스트 가디언즈 원본 (블랙 + 딥블루→시안 그라데이션
+           + 라이트블루 카드 + 화이트 섹션 / 블루 헤딩)
+   구조: 코드잇 스프린트 전환 설계
+   ============================================================ */
+:root{
+  --black:#0A0C10;           /* 네비/다크 밴드 */
+  --dark:#0B1B2B;            /* 히어로 상단 딥 네이비 */
+  --hero-cyan:#0E86C8;       /* 히어로 하단 시안 */
+  --teal-band:#0C4A66;       /* 5가지 이유 배경 티일 */
+  --card-sky:#AEDCF5;        /* 라이트블루 카드 */
+  --card-sky-txt:#0A2A40;    /* 카드 위 텍스트 */
+  --white:#FFFFFF;
+  --paper:#F5F8FB;           /* 화이트 섹션 보조 배경 */
+  --ink:#1A2430;             /* 본문 잉크 */
+  --ink-2:#5A6B7E;           /* 보조 텍스트 */
+  --line:#E3EAF1;
+  --line-dark:rgba(160,200,235,.18);
+  --blue:#1D6FE0;            /* 섹션 헤딩/링크 블루 */
+  --cyan:#2FC5E8;            /* 다크 위 포인트 시안 */
+  --amber:#FFB020;
+  --danger:#E5484D;
+  --radius:14px;
+  --maxw:1080px;
+  --font:'Malgun Gothic','맑은 고딕',-apple-system,'Apple SD Gothic Neo',sans-serif;
+  --mono:Consolas,'Courier New',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--ink);font-family:var(--font);line-height:1.65;-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font);cursor:pointer}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+section{padding:92px 0}
+@media(max-width:768px){section{padding:62px 0}}
+
+/* 공통 타이포 */
+.eyebrow{display:block;font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--blue);margin-bottom:12px}
+.on-dark .eyebrow{color:var(--cyan)}
+h2.sec-title{font-size:34px;font-weight:800;line-height:1.38;letter-spacing:-.015em;color:var(--ink)}
+.on-dark h2.sec-title{color:#fff}
+.sec-sub{margin-top:12px;color:var(--ink-2);font-size:16px}
+.on-dark .sec-sub{color:#B9CFE2}
+.center{text-align:center}
+@media(max-width:768px){h2.sec-title{font-size:25px}.sec-sub{font-size:14.5px}}
+strong.b{color:var(--blue)}
+strong.c{color:var(--cyan)}
+strong.a{color:var(--amber)}
+
+/* ============================================================
+   상단 띠배너 + 네비 (코드잇: 혜택 띠배너 / 가디언즈: 블랙 네비)
+   ============================================================ */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:96;background:linear-gradient(90deg,#0E86C8,#2FC5E8);color:#04202F;font-size:13.5px;font-weight:700;text-align:center;padding:9px 14px;cursor:pointer}
+.topbar b{font-weight:800}
+.nav{position:fixed;top:38px;left:0;right:0;z-index:95;background:rgba(10,12,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:baseline;gap:7px;color:#fff;font-weight:800;font-size:17px;letter-spacing:.02em}
+.brand em{font-style:normal;color:var(--cyan);font-size:11.5px;font-weight:700;letter-spacing:.14em}
+.nav-tabs{display:flex;gap:4px}
+.nav-tabs a{color:#C7D6E4;font-size:14px;font-weight:700;padding:9px 14px;border-radius:9px;transition:.15s}
+.nav-tabs a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-tabs a.on{color:#fff;background:rgba(47,197,232,.16)}
+.nav-cta{background:#fff;color:#0A0C10;border:none;border-radius:10px;padding:9px 20px;font-size:14px;font-weight:800;transition:.15s}
+.nav-cta:hover{background:var(--cyan)}
+@media(max-width:900px){.nav-tabs{display:none}}
+
+/* ============================================================
+   HERO — 가디언즈 원본: 블랙→딥블루→시안, 중앙 정렬
+   ============================================================ */
+.hero{padding:190px 0 0;text-align:center;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#07090D 0%,#0A1622 22%,#0B2740 48%,#0C5480 76%,var(--hero-cyan) 100%)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(47,197,232,.20) 1px,transparent 1px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(640px 420px at 50% 58%,#000 20%,transparent 72%)}
+.hero .badges{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:22px;position:relative}
+.hero .bd{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#DCEBF7}
+.hero .bd.hot{border-color:rgba(255,176,32,.7);color:var(--amber);background:rgba(255,176,32,.1)}
+.hero h1{position:relative;font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+.hero .cohort{display:block;margin-top:6px;font-size:26px;font-weight:700;color:#CFE9F8}
+.hero p.lead{position:relative;margin:20px auto 0;max-width:600px;font-size:16.5px;color:#D5E7F4}
+@media(max-width:768px){.hero{padding-top:160px}.hero h1{font-size:33px}.hero .cohort{font-size:19px}.hero p.lead{font-size:14.5px;padding:0 16px}}
+
+/* 방패 그래픽 (원본 마스코트 자리의 시그니처 오브젝트) */
+.shield-stage{position:relative;margin:44px auto 0;width:min(560px,86%);height:230px}
+.shield{position:absolute;left:50%;top:0;transform:translateX(-50%);width:170px;height:200px;
+  background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.05));
+  border:1.5px solid rgba(255,255,255,.5);
+  clip-path:polygon(50% 0,100% 14%,100% 62%,50% 100%,0 62%,0 14%);
+  backdrop-filter:blur(3px);display:grid;place-items:center}
+.shield .lock{font-size:52px;filter:drop-shadow(0 0 18px rgba(47,197,232,.9))}
+.orb{position:absolute;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:24px;
+  background:rgba(9,26,40,.55);border:1px solid rgba(47,197,232,.45);box-shadow:0 0 24px rgba(47,197,232,.25);
+  animation:float 5s ease-in-out infinite}
+.orb.o1{left:4%;top:26%}.orb.o2{left:17%;top:70%;animation-delay:1.2s}
+.orb.o3{right:4%;top:22%;animation-delay:.6s}.orb.o4{right:16%;top:68%;animation-delay:1.8s}
+@keyframes float{50%{transform:translateY(-12px)}}
+.hero-cta{position:relative;display:inline-block;margin:26px 0 64px;background:#0A0C10;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:16px 46px;font-size:17px;font-weight:800;box-shadow:0 14px 34px rgba(4,20,32,.5);transition:.2s}
+.hero-cta:hover{background:#fff;color:#0A0C10;transform:translateY(-2px)}
+
+/* ============================================================
+   카운트다운 밴드 — 가디언즈 원본 재현 (블랙 밴드 + 라운드 블록)
+   ============================================================ */
+.count-band{background:var(--black);padding:52px 0 58px;text-align:center}
+.count-band .cap{color:#8FA6BA;font-size:14px;font-weight:700;margin-bottom:22px}
+.count-band .cap b{color:var(--amber)}
+.count-grid{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.cblock .n{width:96px;height:96px;display:grid;place-items:center;background:#111318;border:1px solid #2A2F38;border-radius:24px;font-size:40px;font-weight:800;color:#fff;font-family:var(--mono)}
+.cblock .l{margin-top:10px;font-size:13.5px;color:#C3CFDB;font-weight:700}
+@media(max-width:600px){.cblock .n{width:72px;height:72px;font-size:29px;border-radius:18px}}
+
+/* ============================================================
+   시장 근거 (코드잇 장치)
+   ============================================================ */
+.news-grid{margin-top:38px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.news-grid{grid-template-columns:1fr}}
+.news{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.news .tag{display:inline-block;font-size:11.5px;font-weight:800;color:var(--blue);background:rgba(29,111,224,.1);border-radius:6px;padding:3px 9px;margin-bottom:12px;letter-spacing:.06em}
+.news h3{font-size:17px;font-weight:800;line-height:1.5}
+.news p{margin-top:8px;font-size:13.5px;color:var(--ink-2)}
+.market-stats{margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:768px){.market-stats{grid-template-columns:1fr}}
+.mstat{border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;text-align:center}
+.mstat b{display:block;font-size:30px;font-weight:800;color:var(--blue)}
+.mstat span{font-size:13px;color:var(--ink-2)}
+
+/* ============================================================
+   5가지 이유 — 가디언즈 원본 (티일 배경 + 스카이 카드)
+   ============================================================ */
+.why{background:linear-gradient(180deg,var(--hero-cyan) 0%,var(--teal-band) 30%,#0A3049 100%)}
+.why-grid{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:1000px){.why-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.why-grid{grid-template-columns:1fr}}
+.wcard{background:var(--card-sky);color:var(--card-sky-txt);border-radius:14px;padding:22px 18px;transition:.2s}
+.wcard:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(3,24,38,.35)}
+.wcard .ic{font-size:24px}
+.wcard h3{margin:10px 0 8px;font-size:15.5px;font-weight:800;line-height:1.45}
+.wcard p{font-size:12.8px;line-height:1.6;color:#123B57}
+
+/* ============================================================
+   혜택 (모든 수강생 / 모든 수료생) — 가디언즈 원본, 다크
+   ============================================================ */
+.grant{background:var(--black)}
+.grant-grid{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.grant-grid{grid-template-columns:1fr}}
+.gcard{border-radius:16px;padding:36px 32px;position:relative;overflow:hidden;min-height:230px;
+  background:linear-gradient(150deg,#0D1E33,#0A1422);border:1px solid var(--line-dark)}
+.gcard .pill{display:inline-block;font-size:12.5px;font-weight:800;color:#04202F;background:var(--cyan);border-radius:999px;padding:5px 14px;margin-bottom:16px}
+.gcard h3{font-size:26px;font-weight:800;color:#fff;line-height:1.4}
+.gcard p{margin-top:12px;font-size:14px;color:#AFC6D9}
+.gcard .glow{position:absolute;right:-40px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(47,197,232,.28),transparent 70%)}
+.stipend{margin-top:14px;background:#0D1E33;border:1px solid var(--line-dark);border-radius:16px;padding:28px 32px;color:#CFE0EF}
+.stipend h4{font-size:16px;font-weight:800;color:#fff;margin-bottom:12px}
+.stipend h4 b{color:var(--amber)}
+.stipend ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px 22px;font-size:13.5px}
+@media(max-width:768px){.stipend ul{grid-template-columns:1fr}}
+.stipend li{padding-left:18px;position:relative}
+.stipend li::before{content:"✓";position:absolute;left:0;color:var(--cyan);font-weight:800}
+.stipend .note{margin-top:12px;font-size:12px;color:#7E93A8}
+
+/* ============================================================
+   모집 개요 — 원본 좌라벨/우내용 2단
+   ============================================================ */
+.ovlist{margin-top:40px;border-top:2px solid var(--ink)}
+.ovrow{display:grid;grid-template-columns:210px 1fr;gap:20px;padding:22px 4px;border-bottom:1px solid var(--line)}
+@media(max-width:700px){.ovrow{grid-template-columns:1fr;gap:6px;padding:18px 2px}}
+.ovrow dt{font-size:15.5px;font-weight:800;color:var(--ink)}
+.ovrow dd{font-size:15px;color:var(--ink)}
+.ovrow dd small{display:block;margin-top:4px;font-size:13px;color:var(--ink-2)}
+.ovrow dd .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ovrow dd .tags span{font-size:12px;font-weight:700;color:var(--blue);background:rgba(29,111,224,.08);border:1px solid rgba(29,111,224,.2);border-radius:7px;padding:3px 10px}
+.ovrow.em dt,.ovrow.em dd{color:var(--blue);font-weight:800}
+
+/* ============================================================
+   커리큘럼 — 단계 타임라인(코드잇) × 원본 3대 영역
+   ============================================================ */
+.curri-flow{margin-top:44px;position:relative;display:flex;flex-direction:column;gap:0}
+.cmod{display:grid;grid-template-columns:150px 1fr;gap:26px;padding:30px 0;border-bottom:1px solid var(--line);position:relative}
+@media(max-width:700px){.cmod{grid-template-columns:1fr;gap:12px}}
+.cmod .wk{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue)}
+.cmod .wk b{display:block;font-size:15px;color:var(--ink);font-family:var(--font);margin-top:4px}
+.cmod h3{font-size:19px;font-weight:800;margin-bottom:10px}
+.cmod p{font-size:14.5px;color:var(--ink-2);line-height:1.75}
+.cmod .skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cmod .skills span{font-size:12px;font-weight:700;color:var(--ink-2);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+.curri-note{margin-top:18px;font-size:12.5px;color:var(--ink-2)}
+
+/* ============================================================
+   프로젝트 소개 (코드잇 STEP 장치)
+   ============================================================ */
+.proj{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.proj-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.proj-grid{grid-template-columns:1fr}}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+.pcard .stp{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.1em}
+.pcard h3{margin:10px 0 10px;font-size:17px;font-weight:800;line-height:1.5}
+.pcard p{font-size:13.5px;color:var(--ink-2)}
+.pcard .mock{margin-top:18px;background:#0B1B2B;border-radius:10px;padding:14px;font-family:var(--mono);font-size:11.5px;line-height:1.8;color:#9FE8F5;overflow:hidden}
+.pcard .mock .dim{color:#5D7A90}
+
+/* ============================================================
+   취업분야
+   ============================================================ */
+.job-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.job-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.job-grid{grid-template-columns:1fr}}
+.job{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:.2s}
+.job:hover{border-color:var(--blue);box-shadow:0 12px 28px rgba(29,111,224,.12);transform:translateY(-3px)}
+.job h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.job p{margin-top:9px;font-size:13.5px;color:var(--ink-2)}
+
+/* ============================================================
+   비교표 (코드잇 장치)
+   ============================================================ */
+.cmp{background:var(--black)}
+.cmp-table{margin-top:44px;border-radius:16px;overflow:hidden;border:1px solid var(--line-dark)}
+.cmp-row{display:grid;grid-template-columns:1fr 1.15fr;background:#0D1520}
+.cmp-row.head{background:#111C2B}
+.cmp-row>div{padding:20px 26px;font-size:14.5px;border-bottom:1px solid var(--line-dark)}
+.cmp-row:last-child>div{border-bottom:none}
+.cmp-row .l{color:#8CA0B3;border-right:1px solid var(--line-dark)}
+.cmp-row .r{color:#EAF4FB;background:rgba(47,197,232,.06)}
+.cmp-row.head .l{color:#B4C4D2;font-weight:800;font-size:15px}
+.cmp-row.head .r{color:var(--cyan);font-weight:800;font-size:15px}
+.cmp-row .x::before{content:"✕  ";color:#5C6B79;font-weight:800}
+.cmp-row .o::before{content:"✓  ";color:var(--cyan);font-weight:800}
+@media(max-width:640px){.cmp-row>div{padding:15px 16px;font-size:13px}}
+
+/* ============================================================
+   케어/취업지원 4카드 — 원본
+   ============================================================ */
+.care-grid{margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.care-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.care-grid{grid-template-columns:1fr}}
+.care{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.care .ic{font-size:26px}
+.care h3{margin:12px 0 8px;font-size:15.5px;font-weight:800;line-height:1.45}
+.care ul{list-style:none;font-size:13px;color:var(--ink-2)}
+.care li{padding-left:14px;position:relative;margin-top:4px}
+.care li::before{content:"·";position:absolute;left:2px;color:var(--blue);font-weight:800}
+
+/* ============================================================
+   선발 절차 — 원본 STEP 1-3 + 상세
+   ============================================================ */
+.steps{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:768px){.steps{grid-template-columns:1fr}}
+.stp-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;text-align:center}
+.stp-card .no{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.14em;border:1px solid rgba(29,111,224,.35);border-radius:999px;padding:4px 14px}
+.stp-card h4{margin:14px 0 6px;font-size:16.5px;font-weight:800;line-height:1.5}
+.stp-card p{font-size:13px;color:var(--ink-2)}
+.apply-info{margin-top:16px;border-top:2px solid var(--ink)}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-wrap{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.faq{margin-top:38px;display:flex;flex-direction:column;gap:10px}
+.qa{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.qa-q{width:100%;background:none;border:none;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:14px;padding:19px 22px;font-size:15.5px;font-weight:800;text-align:left}
+.qa-q .cat{color:var(--blue);margin-right:2px}
+.qa-q .arr{color:var(--ink-2);transition:.25s;flex:0 0 auto}
+.qa.open .arr{transform:rotate(180deg)}
+.qa-a{display:none;padding:0 22px 20px;font-size:14.5px;color:var(--ink-2);line-height:1.8}
+.qa.open .qa-a{display:block}
+
+/* ============================================================
+   지원 폼 — 코드잇식 초저마찰
+   ============================================================ */
+#apply{background:linear-gradient(180deg,#0A1622 0%,#0B2740 55%,#0C4A66 100%);border-top:1px solid var(--line-dark)}
+.form-card{margin:40px auto 0;background:#fff;border-radius:20px;padding:40px;max-width:600px;box-shadow:0 30px 80px rgba(2,16,28,.5)}
+@media(max-width:600px){.form-card{padding:28px 20px}}
+.form-card .fc-head{text-align:center;margin-bottom:26px}
+.form-card .fc-head h3{font-size:21px;font-weight:800;color:var(--ink)}
+.form-card .fc-head p{margin-top:6px;font-size:13.5px;color:var(--ink-2)}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.f-row{grid-template-columns:1fr}}
+.f-group{margin-bottom:16px}
+.f-group label{display:block;font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:7px}
+.f-group label .req{color:var(--danger)}
+.f-group input,.f-group select,.f-group textarea{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--ink);font-family:var(--font);font-size:15px;transition:.15s}
+.f-group input:focus,.f-group select:focus,.f-group textarea:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(29,111,224,.14)}
+.f-group textarea{resize:vertical;min-height:80px}
+.f-group .err{display:none;margin-top:5px;font-size:12.5px;color:var(--danger)}
+.f-group.invalid input,.f-group.invalid select{border-color:var(--danger)}
+.f-group.invalid .err{display:block}
+.more-fields{border:1px dashed var(--line);border-radius:12px;padding:6px 16px;margin-bottom:16px}
+.more-fields summary{cursor:pointer;font-size:13.5px;font-weight:800;color:var(--blue);padding:10px 0;list-style:none;display:flex;align-items:center;gap:6px}
+.more-fields summary::-webkit-details-marker{display:none}
+.more-fields summary::before{content:"+";font-size:16px}
+.more-fields[open] summary::before{content:"−"}
+.more-fields .inner{padding:8px 0 12px}
+.consent{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;margin:6px 0 20px}
+.consent input{width:17px;height:17px;margin-top:2px;accent-color:var(--blue)}
+.consent label{font-size:13px;color:var(--ink-2);line-height:1.6}
+.consent label a{color:var(--blue);text-decoration:underline}
+.privacy-detail{display:none;margin:0 0 18px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;font-size:12.5px;color:var(--ink-2);line-height:1.7}
+.privacy-detail.show{display:block}
+.btn-submit{width:100%;background:linear-gradient(90deg,#0E86C8,#1D6FE0);color:#fff;border:none;border-radius:12px;padding:17px;font-size:17px;font-weight:800;transition:.2s;box-shadow:0 10px 26px rgba(14,134,200,.4)}
+.btn-submit:hover{filter:brightness(1.08)}
+.btn-submit:disabled{opacity:.55;cursor:wait}
+.form-note{margin-top:14px;text-align:center;font-size:12.5px;color:var(--ink-2)}
+.form-done{display:none;text-align:center;padding:34px 10px}
+.form-done .big{font-size:44px}
+.form-done h3{margin:14px 0 8px;font-size:21px;font-weight:800;color:var(--ink)}
+.form-done p{font-size:14.5px;color:var(--ink-2)}
+
+/* ============================================================
+   푸터 / 고정 요소
+   ============================================================ */
+footer{background:var(--black);padding:46px 0 140px;color:#7E93A8;font-size:12.5px}
+footer .f-brand{font-weight:800;color:#C7D6E4;font-size:14px;margin-bottom:10px}
+.sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:94;background:rgba(10,12,16,.94);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.1);padding:12px 0}
+.sticky-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.sticky-in .info{font-size:14px;color:#C7D6E4}
+.sticky-in .info b{color:var(--amber);font-family:var(--mono)}
+.sticky-in .info .t2{font-size:12px;color:#7E93A8}
+.sticky-btn{background:#fff;color:#0A0C10;border:none;border-radius:11px;padding:13px 32px;font-size:15.5px;font-weight:800;white-space:nowrap}
+.sticky-btn:hover{background:var(--cyan)}
+@media(max-width:600px){.sticky-in .info .t2{display:none}}
+.float-ask{position:fixed;right:22px;bottom:86px;z-index:94;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:12px 20px;font-size:13.5px;font-weight:800;box-shadow:0 10px 30px rgba(2,16,28,.3)}
+.float-ask:hover{color:var(--blue)}
+@media(max-width:600px){.float-ask{display:none}}
+
+/* ============================================================
+   관리자 패널 / 토스트 (기능 유지)
+   ============================================================ */
+.admin{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,8,14,.9);backdrop-filter:blur(6px);overflow:auto;padding:40px 16px}
+.admin.show{display:block}
+.admin-card{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;color:var(--ink)}
+.admin-card h3{font-size:19px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.admin-card h3 button{background:none;border:none;color:var(--ink-2);font-size:22px}
+.admin-tools{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.a-btn{border-radius:9px;padding:10px 16px;font-size:13.5px;font-weight:700;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.a-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.a-btn.danger{color:var(--danger);border-color:rgba(229,72,77,.4)}
+.a-stat{font-size:13px;color:var(--ink-2);margin-bottom:12px}
+.a-tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+.a-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+.a-table th,.a-table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.a-table th{background:var(--paper);color:var(--ink-2);position:sticky;top:0}
+.a-table td .ok{color:#0FA968}.a-table td .no{color:var(--amber)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);z-index:300;background:#0D1E33;color:#fff;border-radius:12px;padding:13px 22px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* v3 추가 스타일 ------------------------------------------- */
+/* 혜택 아이콘 스트립 (코드잇 '수강생 전원 특별 혜택') */
+.bstrip{background:#fff;border-bottom:1px solid var(--line);padding:30px 0}
+.bstrip-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center}
+.bstrip .cap{font-size:15.5px;font-weight:800;color:var(--ink);white-space:nowrap}
+.bstrip .items{display:flex;gap:8px 26px;flex-wrap:wrap;justify-content:center}
+.bstrip .it{text-align:center;font-size:12.5px;font-weight:700;color:var(--ink-2);width:86px}
+.bstrip .it .ic{width:46px;height:46px;margin:0 auto 7px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(150deg,#0E86C8,#1D6FE0);font-size:20px}
+
+/* 질문형 섹션 넘버 */
+.qnum{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--blue);border:1px solid rgba(29,111,224,.3);border-radius:999px;padding:5px 14px;margin-bottom:14px}
+.on-dark .qnum{color:var(--cyan);border-color:rgba(47,197,232,.4)}
+
+/* 채용 요구 역량 JD 카드 */
+.jd-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.jd-grid{grid-template-columns:1fr}}
+.jd{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.jd .role{font-size:14.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+.jd .role::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--blue)}
+.jd ul{margin-top:12px;list-style:none;font-size:13px;color:var(--ink-2);line-height:1.7}
+.jd li{padding-left:14px;position:relative}
+.jd li::before{content:"·";position:absolute;left:2px;color:var(--blue);font-weight:800}
+.jd .match{margin-top:14px;font-size:12px;font-weight:800;color:#0FA968;background:rgba(15,169,104,.08);border-radius:8px;padding:7px 11px}
+.jd-note{margin-top:14px;font-size:12px;color:var(--ink-2)}
+
+/* 용어 번역 카드 */
+.term-grid{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.term-grid{grid-template-columns:1fr}}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+.tcard b{display:block;font-size:15px;color:var(--blue)}
+.tcard span{display:block;margin-top:6px;font-size:13.5px;color:var(--ink);line-height:1.6}
+
+/* 응용 분야 그리드 */
+.field-grid{margin-top:26px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:900px){.field-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.field-grid{grid-template-columns:repeat(2,1fr)}}
+.fld{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 12px;text-align:center}
+.fld .ic{font-size:22px}
+.fld b{display:block;margin-top:7px;font-size:13px;color:var(--ink)}
+.fld span{display:block;margin-top:3px;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+
+/* 불안 호명 섹션 */
+.anx{background:linear-gradient(180deg,#0B1B2B,#0A2A40)}
+.anx-lead{margin-top:8px;font-size:17px;color:#CFE4F4}
+.anx-lead b{color:var(--cyan)}
+
+/* 후기 카테고리 카드 */
+.rev-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.rev-grid{grid-template-columns:1fr}}
+.rev{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:12px}
+.rev .cat{align-self:flex-start;font-size:11.5px;font-weight:800;color:var(--blue);background:rgba(29,111,224,.08);border:1px solid rgba(29,111,224,.22);border-radius:999px;padding:4px 12px}
+.rev p{font-size:14px;line-height:1.75;color:var(--ink)}
+.rev .who{margin-top:auto;font-size:12.5px;color:var(--ink-2)}
+.rev-note{margin-top:14px;font-size:12px;color:var(--ink-2)}
+
+/* 가격 앵커 (모집 개요) */
+.price-anchor{margin-top:16px;border:1px solid rgba(29,111,224,.3);background:linear-gradient(90deg,rgba(14,134,200,.06),rgba(29,111,224,.06));border-radius:var(--radius);padding:24px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}
+.price-anchor .strike{color:var(--ink-2);text-decoration:line-through;font-size:16px}
+.price-anchor .zero{font-size:30px;font-weight:800;color:var(--blue)}
+.price-anchor .plus{font-size:14px;color:var(--ink);font-weight:700}
+.price-anchor .fn{width:100%;font-size:12px;color:var(--ink-2)}
+
+/* 히어로 가격 라인 */
+.hero-price{position:relative;margin-top:18px;font-size:15px;color:#CFE4F4}
+.hero-price .st{text-decoration:line-through;color:#7FA3BC}
+.hero-price b{color:#fff;font-size:19px;margin-left:6px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============================================================
+   V4 REFINEMENT LAYER — 타이포/그림자/모션 시스템
+   ============================================================ */
+:root{
+  --sh-1:0 1px 2px rgba(10,20,32,.05),0 4px 12px rgba(10,20,32,.06);
+  --sh-2:0 2px 4px rgba(10,20,32,.06),0 12px 32px rgba(10,20,32,.12);
+  --sh-3:0 4px 8px rgba(10,20,32,.08),0 24px 56px rgba(10,20,32,.18);
+  --ease:cubic-bezier(.22,.9,.28,1);
+}
+body{font-size:15.5px}
+section{padding:clamp(64px,9vw,116px) 0}
+h2.sec-title{font-size:clamp(25px,3.6vw,38px);line-height:1.32;letter-spacing:-.022em}
+.sec-sub{max-width:640px}
+.center .sec-sub{margin-left:auto;margin-right:auto}
+
+/* 스크롤 프로그레스 */
+.progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:120;background:linear-gradient(90deg,var(--hero-cyan),var(--cyan));box-shadow:0 0 12px rgba(47,197,232,.7);transition:width .12s linear}
+
+/* 네비: 스크롤 축소 + 언더라인 인디케이터 */
+.nav{transition:box-shadow .3s var(--ease)}
+.nav.scrolled{box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.nav-tabs a{position:relative;background:none!important}
+.nav-tabs a::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;border-radius:2px;background:var(--cyan);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav-tabs a.on{color:#fff}
+.nav-tabs a.on::after{transform:scaleX(1)}
+
+/* 히어로 폴리시 */
+.hero h1{text-shadow:0 2px 24px rgba(4,20,34,.4)}
+.shield{box-shadow:0 0 0 1px rgba(255,255,255,.15),0 30px 60px rgba(3,18,30,.5)}
+.shield::after{content:"";position:absolute;inset:-14px;border-radius:26px;border:1px dashed rgba(47,197,232,.4);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-cta{position:relative;overflow:hidden}
+.hero-cta::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:sheen 3.6s var(--ease) infinite}
+@keyframes sheen{0%,55%{left:-70%}85%,100%{left:130%}}
+.scroll-hint{position:relative;margin:-40px auto 26px;width:22px;height:36px;border:2px solid rgba(255,255,255,.5);border-radius:12px}
+.scroll-hint::before{content:"";position:absolute;left:50%;top:7px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:#fff;animation:drop 1.6s var(--ease) infinite}
+@keyframes drop{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(12px)}}
+
+/* 카운트다운: 초 단위 펄스 + 유리 질감 */
+.cblock .n{background:linear-gradient(160deg,#14171D,#0D0F14);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 28px rgba(0,0,0,.45)}
+.cblock .n.tick{animation:pulse .5s var(--ease)}
+@keyframes pulse{0%{transform:scale(1)}35%{transform:scale(1.07);color:var(--cyan)}100%{transform:scale(1)}}
+
+/* 기술 키워드 티커 */
+.ticker{background:var(--black);border-top:1px solid rgba(255,255,255,.06);padding:16px 0;overflow:hidden}
+.ticker-track{display:flex;gap:14px;width:max-content;animation:marq 30s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker span{font-family:var(--mono);font-size:12.5px;font-weight:700;color:#7FA3BC;border:1px solid rgba(160,200,235,.18);border-radius:999px;padding:7px 16px;white-space:nowrap}
+.ticker span b{color:var(--cyan);font-weight:700}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* 카드 시스템: 층위 그림자 + 리프트 */
+.jd,.tcard,.fld,.job,.care,.rev,.pcard,.stp-card,.news,.mstat{box-shadow:var(--sh-1);transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease)}
+.jd:hover,.job:hover,.care:hover,.rev:hover,.pcard:hover,.news:hover{transform:translateY(-5px);box-shadow:var(--sh-2);border-color:rgba(29,111,224,.35)}
+.wcard{box-shadow:0 6px 16px rgba(3,24,38,.22)}
+.gcard{box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 20px 44px rgba(0,0,0,.4)}
+.cmp-table{box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.cmp-row .r{position:relative}
+.cmp-row .r::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--cyan),transparent)}
+
+/* 스크롤 리빌 (JS가 html.js 부여 시에만 초기 숨김) */
+html.js [data-rv]{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+html.js [data-rv].in{opacity:1;transform:none}
+html.js [data-rv].from-l{transform:translateX(-30px)}
+html.js [data-rv].from-l.in{transform:none}
+
+/* FAQ/아코디언 부드러운 전개 */
+.qa-a{display:block;overflow:hidden;max-height:0;padding-top:0;padding-bottom:0;transition:max-height .45s var(--ease),padding .45s var(--ease)}
+.qa.open .qa-a{padding-bottom:20px}
+.qa-q{transition:color .2s}
+.qa.open .qa-q{color:var(--blue)}
+.more-fields .inner{overflow:hidden}
+
+/* 폼 마이크로 인터랙션 */
+.f-group input,.f-group select,.f-group textarea{transition:border-color .2s,box-shadow .2s,background .2s}
+.f-group.valid input{border-color:#0FA968;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%230FA968' viewBox='0 0 16 16'%3E%3Cpath d='M13.5 4.5l-7 7L3 8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:15px}
+.f-group.invalid input{animation:shake .4s var(--ease)}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.btn-submit{position:relative}
+.btn-submit.loading{color:transparent}
+.btn-submit.loading::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.form-done{animation:rise .6s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+
+/* 하단 CTA: 스크롤 후 등장 */
+.sticky-cta{transform:translateY(110%);transition:transform .45s var(--ease)}
+.sticky-cta.show{transform:none}
+.sticky-btn{transition:transform .2s var(--ease),background .2s}
+.sticky-btn:hover{transform:translateY(-2px)}
+.float-ask{transition:transform .2s var(--ease),box-shadow .2s}
+.float-ask:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(2,16,28,.4)}
+
+@media (prefers-reduced-motion:reduce){
+  html.js [data-rv]{opacity:1;transform:none}
+  .sticky-cta{transform:none}
+}
+
+/* ============================================================
+   V5 REFINEMENT — 서체 통일 · 타이포 스케일 · 가독성
+   ============================================================ */
+:root{
+  --fs-xs:12.5px; --fs-sm:13.5px; --fs-base:15.5px; --fs-md:17px; --fs-lg:19px;
+  --ink-2:#4E6172;                 /* 본문 보조 대비 상향 */
+}
+body{font-size:var(--fs-base);line-height:1.7;letter-spacing:-.008em}
+
+/* ── 서체 완전 통일: 모노스페이스는 코드 목업(.mock)에만 허용 ── */
+.qnum,.cblock .n,.ticker span,.sticky-in .info b,.cmod .wk,.pcard .stp,.stp-card .no,.diff .num{font-family:var(--font)}
+.cblock .n{font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:-.01em}
+#countdown2{font-variant-numeric:tabular-nums}
+
+/* ── 섹션 라벨(.eyebrow/.qnum) 단일 스타일로 통일 ── */
+.eyebrow,.qnum{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--blue);border:none;border-radius:0;padding:0;margin-bottom:16px}
+.eyebrow::before,.qnum::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--blue);transform:rotate(45deg)}
+.on-dark .eyebrow,.on-dark .qnum{color:var(--cyan)}
+.on-dark .eyebrow::before,.on-dark .qnum::before{background:var(--cyan)}
+.center .eyebrow,.center .qnum{justify-content:center}
+
+/* ── 헤딩 스케일 & 리듬 통일 ── */
+h2.sec-title{font-size:clamp(25px,3.4vw,36px);line-height:1.34;letter-spacing:-.024em}
+.sec-sub{margin-top:14px;font-size:var(--fs-md);line-height:1.75;max-width:620px}
+h2.sec-title + .news-grid, h2.sec-title + .why-grid, h2.sec-title + .job-grid{margin-top:48px}
+.news h3,.jd .role,.job h3,.care h3,.wcard h3,.pcard h3{letter-spacing:-.015em}
+.news h3{font-size:var(--fs-md)}
+.cmod h3{font-size:clamp(17px,2vw,20px)}
+.cmod p,.qa-a,.pain p{font-size:14.5px;line-height:1.8}
+.gcard h3{font-size:clamp(21px,2.4vw,26px);letter-spacing:-.02em}
+
+/* ── 본문 가독성: 행 길이 제한 ── */
+.ovrow dd,.qa-a,.stipend{max-width:760px}
+.anx-lead{max-width:680px;margin-left:auto;margin-right:auto;font-size:16px;line-height:1.85}
+
+/* ── 아이콘 시스템 ── */
+.i{width:1em;height:1em;flex:0 0 auto;vertical-align:-0.14em}
+.brand .i{width:19px;height:19px;color:var(--cyan)}
+.topbar .i{width:15px;height:15px;vertical-align:-2px;margin-right:5px}
+.bstrip .it .ic,.fld .ic{background:transparent}
+.bstrip .it .ic{width:48px;height:48px;border-radius:14px;background:linear-gradient(150deg,rgba(14,134,200,.1),rgba(29,111,224,.14));border:1px solid rgba(29,111,224,.18);color:var(--blue)}
+.bstrip .it .ic .i{width:21px;height:21px}
+.wcard .ic{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(10,42,64,.1);color:#0A2A40}
+.wcard .ic .i{width:21px;height:21px}
+.care .ic,.fld .ic{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:rgba(29,111,224,.08);color:var(--blue);font-size:0}
+.care .ic .i,.fld .ic .i{width:20px;height:20px}
+.fld .ic{margin:0 auto}
+.job h3 .i{width:19px;height:19px;color:var(--blue)}
+.stipend h4 .i{width:18px;height:18px;color:var(--amber);margin-right:7px;vertical-align:-3px}
+.form-done .big{color:var(--blue)}
+.form-done .big .i{width:52px;height:52px}
+.float-ask .i{width:16px;height:16px;margin-right:6px;color:var(--blue)}
+.cmp-row.head .r .i{width:17px;height:17px;margin-right:7px;vertical-align:-3px}
+.shield .lock{font-size:0}
+.shield .lock .i{width:54px;height:54px;color:#fff;filter:drop-shadow(0 0 18px rgba(47,197,232,.95))}
+.orb{font-size:0;color:var(--cyan);background:rgba(9,26,40,.5)}
+.orb .i{width:24px;height:24px}
+.count-band .cap .i{width:15px;height:15px;color:var(--amber);margin-right:6px;vertical-align:-2.5px}
+
+/* ── 히어로 타이포 정돈 ── */
+.hero h1{font-size:clamp(32px,5vw,54px);letter-spacing:-.028em}
+.hero .cohort{font-size:clamp(16px,2.2vw,23px);font-weight:700;color:#BFE0F5;letter-spacing:-.01em;margin-top:10px}
+.hero p.lead{font-size:clamp(14.5px,1.6vw,16.5px);line-height:1.8}
+.hero .bd{letter-spacing:0}
+
+/* ── 카드/테이블 밀도 통일 ── */
+.news,.jd,.job,.care,.rev,.pcard{padding:28px}
+.tcard{padding:24px 26px}
+.ovrow{padding:24px 4px}
+.ovrow dt{font-size:15px}
+.ovrow dd{font-size:15px;line-height:1.75}
+.ovrow dd small{line-height:1.75;color:var(--ink-2)}
+.qa-q{font-size:15.5px;padding:20px 24px}
+.qa-a{padding-left:24px;padding-right:24px}
+.cmp-row>div{line-height:1.7}
+
+/* ── 버튼 통일 (높이·라운드·전이) ── */
+.btn-submit,.hero-cta,.sticky-btn,.nav-cta{letter-spacing:-.01em}
+.hero-cta{border-radius:14px;padding:17px 52px}
+
+/* ── 폼 라벨/입력 정돈 ── */
+.f-group label{font-size:13px;letter-spacing:.01em}
+.f-group input,.f-group select,.f-group textarea{font-size:15px;padding:13.5px 15px;border-radius:11px}
+.form-card{border-radius:22px;box-shadow:0 34px 90px rgba(2,16,28,.55)}
+.form-card .fc-head h3{letter-spacing:-.02em}
+
+/* ── 다크 섹션 보조 텍스트 대비 상향 ── */
+.on-dark .sec-sub{color:#C6D9E9}
+.gcard p{color:#B9CFE0;line-height:1.75}
+.stipend{line-height:1.8}
+footer{line-height:1.8}
+
+/* ============================================================
+   V6 LIGHT THEME — 코드잇 홈페이지 무드 (화이트 · 소프트 블루)
+   ============================================================ */
+:root{
+  --bg-soft:#F4F8FD;
+  --lav:#EAF3FC;                      /* 소프트 블루 틴트 */
+  --hero-g:linear-gradient(165deg,#FFFFFF 0%,#EDF5FD 46%,#E2EFFB 100%);
+}
+body{background:#fff;color:var(--ink)}
+
+/* ── 탑바/네비: 라이트 ── */
+.topbar{background:linear-gradient(90deg,#1D6FE0,#2FA8E8);color:#fff}
+.nav{top:38px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line)}
+.nav.scrolled{box-shadow:0 8px 30px rgba(16,42,74,.08)}
+.brand{color:var(--ink)}
+.brand em{color:var(--blue)}
+.brand .i{color:var(--blue)}
+.nav-cta{background:var(--ink);color:#fff}
+.nav-cta:hover{background:var(--blue);color:#fff}
+
+/* 과정 탭 (코드잇 트랙 탭) */
+.course-tabs{display:flex;align-items:center;gap:4px}
+.ct{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:var(--ink);padding:9px 14px;border-radius:11px;transition:.15s}
+.ct:hover{background:var(--bg-soft)}
+.ct.on{background:var(--ink);color:#fff}
+.ct i{font-style:normal;font-size:11px;font-weight:800;color:var(--blue);background:rgba(29,111,224,.1);border:1px solid rgba(29,111,224,.25);border-radius:999px;padding:2.5px 9px;letter-spacing:0}
+.ct.on i{color:#fff;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3)}
+@media(max-width:900px){.course-tabs{display:none}}
+
+/* 서브내비 (스크롤 후 등장하는 섹션 탭) */
+.subnav{position:fixed;top:98px;left:0;right:0;z-index:93;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);transform:translateY(-120%);transition:transform .35s var(--ease)}
+.subnav.show{transform:none}
+.subnav-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;display:flex;gap:2px;overflow-x:auto}
+.subnav-in a{position:relative;white-space:nowrap;font-size:13.5px;font-weight:700;color:var(--ink-2);padding:13px 15px}
+.subnav-in a::after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:2.5px;border-radius:2px;background:var(--blue);transform:scaleX(0);transition:transform .3s var(--ease)}
+.subnav-in a.on{color:var(--blue)}
+.subnav-in a.on::after{transform:scaleX(1)}
+.nav-tabs{display:contents}
+
+/* ── HERO: 라이트 2단 ── */
+.hero{background:var(--hero-g);color:var(--ink);text-align:left;padding:158px 0 120px;overflow:visible}
+.hero::before{background-image:radial-gradient(rgba(29,111,224,.12) 1px,transparent 1px);mask-image:radial-gradient(640px 460px at 74% 45%,#000 25%,transparent 75%)}
+.hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+@media(max-width:900px){.hero-in{grid-template-columns:1fr;gap:40px}.hero{padding:140px 0 90px}}
+.hero .badges{justify-content:flex-start;margin-bottom:18px}
+.hero .bd{border:1px solid rgba(29,111,224,.22);background:#fff;color:var(--blue);box-shadow:var(--sh-1)}
+.hero .bd.hot{border-color:rgba(255,140,20,.4);color:#E07800;background:#FFF7EE}
+.hero-eyebrow{font-size:15px;font-weight:800;color:var(--blue);margin-bottom:10px;letter-spacing:-.01em}
+.hero h1{color:var(--ink);text-shadow:none;font-size:clamp(33px,4.6vw,52px);line-height:1.22}
+.hero p.lead{color:var(--ink-2);margin:16px 0 0;max-width:480px;font-size:15.5px}
+.hero-info{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid rgba(29,111,224,.18)}
+.hero-info>div{padding:16px 4px;border-bottom:1px solid rgba(29,111,224,.14)}
+.hero-info>div:nth-child(odd){border-right:1px solid rgba(29,111,224,.14);padding-right:18px}
+.hero-info>div:nth-child(even){padding-left:18px}
+.hero-info dt{font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px}
+.hero-info dd{font-size:15.5px;font-weight:700;color:var(--ink)}
+.hero-info dd em{font-style:normal;font-size:11.5px;font-weight:800;color:#E5484D;background:#FFEFF0;border-radius:6px;padding:2.5px 8px;margin-left:6px;vertical-align:1px}
+.hero-info dd s{color:var(--ink-2);font-weight:400;margin-right:6px}
+.hero-info dd b{color:var(--blue);font-size:17px}
+.hero-cta{margin:30px 0 0;background:var(--ink);border:none;color:#fff;box-shadow:0 14px 30px rgba(16,42,74,.22);border-radius:14px}
+.hero-cta:hover{background:var(--blue);color:#fff;transform:translateY(-2px)}
+
+/* 히어로 그래픽 라이트화 */
+.shield-stage{height:340px;margin:0}
+.shield{width:190px;height:220px;top:50px;background:linear-gradient(160deg,#1D6FE0,#2FA8E8);border:none;box-shadow:0 34px 70px rgba(29,111,224,.35)}
+.shield::after{border-color:rgba(29,111,224,.35)}
+.shield .lock .i{color:#fff;filter:drop-shadow(0 6px 16px rgba(6,40,80,.35))}
+.orb{background:#fff;border:1px solid var(--line);box-shadow:var(--sh-2);color:var(--blue);border-radius:18px}
+.orb.o1{left:6%;top:16%}.orb.o2{left:14%;top:66%}.orb.o3{right:6%;top:12%}.orb.o4{right:12%;top:64%}
+
+/* ── 혜택 스트립: 히어로에 겹치는 플로팅 카드 (코드잇) ── */
+.bstrip{background:transparent;border:none;padding:0;position:relative;z-index:5;margin-top:-58px}
+.bstrip-in{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 26px 60px rgba(16,42,74,.12);padding:28px 30px;gap:22px}
+@media(max-width:900px){.bstrip{margin-top:-30px}}
+
+/* ── 카운트다운: 다크 액센트 밴드 유지 + 라운드 상향 ── */
+.count-band{background:#0C0F14;border-radius:0;margin-top:64px}
+
+/* ── 티커: 라이트 ── */
+.ticker{background:#fff;border-top:none;border-bottom:1px solid var(--line)}
+.ticker span{color:var(--ink-2);border-color:var(--line);background:var(--bg-soft)}
+.ticker span b{color:var(--blue)}
+
+/* ── 5가지 이유: 라이트 밴드 + 화이트 카드 ── */
+.why{background:linear-gradient(180deg,var(--lav),#F7FAFE)}
+.why .sec-title{color:var(--ink)}
+.wcard{background:#fff;border:1px solid var(--line);color:var(--ink);box-shadow:var(--sh-1)}
+.wcard:hover{box-shadow:var(--sh-2);transform:translateY(-4px)}
+.wcard .ic{background:rgba(29,111,224,.08);color:var(--blue)}
+.wcard p{color:var(--ink-2)}
+.wcard h3{color:var(--ink)}
+
+/* ── 혜택(grant): 라이트 ── */
+.grant{background:#fff}
+.grant .sec-title{color:var(--ink)}
+.gcard{background:linear-gradient(150deg,#EFF6FE,#E3F0FC);border:1px solid rgba(29,111,224,.16);box-shadow:var(--sh-1)}
+.gcard h3{color:var(--ink)}
+.gcard p{color:var(--ink-2)}
+.gcard .pill{background:var(--blue);color:#fff}
+.gcard .glow{background:radial-gradient(circle,rgba(29,111,224,.16),transparent 70%)}
+.stipend{background:var(--bg-soft);border:1px solid var(--line);color:var(--ink)}
+.stipend h4{color:var(--ink)}
+.stipend h4 b{color:#E07800}
+.stipend li::before{color:var(--blue)}
+.stipend .note{color:var(--ink-2)}
+.stipend ul{color:var(--ink-2)}
+
+/* ── 불안 호명: 라이트 소프트 ── */
+.anx{background:linear-gradient(180deg,#F7FAFE,var(--lav))}
+.anx .sec-title{color:var(--ink)}
+.anx-lead{color:var(--ink-2)}
+.anx-lead b{color:var(--blue)}
+
+/* ── 함께 모집 중인 과정 ── */
+.courses-sec{background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.course-grid{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.course-grid{grid-template-columns:1fr}}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--sh-1);transition:transform .35s var(--ease),box-shadow .35s var(--ease);display:flex;flex-direction:column}
+.ccard:hover{transform:translateY(-5px);box-shadow:var(--sh-3)}
+.ccard-head{padding:30px 30px 26px;color:#fff}
+.ccard-head.quant{background:linear-gradient(150deg,#3A2E86,#5B48D0)}
+.ccard-head.human{background:linear-gradient(150deg,#0B5A6E,#12A0A8)}
+.ctag{display:inline-block;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 12px;margin-bottom:14px}
+.ccard-head h3{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.ccard-head h3 small{display:block;font-size:12.5px;font-weight:700;opacity:.85;margin-top:4px}
+.ccard-head p{margin-top:14px;font-size:14.5px;line-height:1.7;opacity:.95}
+.ccard-body{padding:26px 30px 30px;display:flex;flex-direction:column;flex:1}
+.cinfo{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.cinfo dt{font-size:12px;font-weight:800;color:var(--blue);margin-bottom:3px}
+.cinfo dd{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5}
+.cinfo dd s{color:var(--ink-2);font-weight:400}
+.cpoints{margin-top:20px;list-style:none;border-top:1px dashed var(--line);padding-top:18px}
+.cpoints li{position:relative;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.75;margin-top:7px}
+.cpoints li::before{content:"✓";position:absolute;left:0;color:var(--blue);font-weight:800}
+.cpoints li b{color:var(--ink)}
+.cfoot{margin-top:16px;font-size:12.5px;color:var(--ink-2);background:var(--bg-soft);border-radius:10px;padding:12px 14px;line-height:1.7}
+.cbtn{margin-top:20px;width:100%;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:12px;padding:14px;font-size:15px;font-weight:800;transition:.2s}
+.cbtn:hover{background:var(--ink);color:#fff}
+
+/* ── 지원 섹션: 라이트 ── */
+#apply{background:linear-gradient(180deg,#fff,var(--lav))}
+#apply .sec-title{color:var(--ink)}
+#apply .sec-sub{color:var(--ink-2)}
+#apply .sec-sub strong.c{color:var(--blue)}
+.form-card{border:1px solid var(--line);box-shadow:0 30px 80px rgba(16,42,74,.14)}
+
+/* ── 푸터/고정: 라이트 ── */
+footer{background:var(--bg-soft);border-top:1px solid var(--line);color:var(--ink-2)}
+footer .f-brand{color:var(--ink)}
+.sticky-cta{background:rgba(255,255,255,.94);border-top:1px solid var(--line);box-shadow:0 -10px 34px rgba(16,42,74,.08)}
+.sticky-in .info{color:var(--ink)}
+.sticky-in .info b{color:#E07800}
+.sticky-in .info .t2{color:var(--ink-2)}
+.sticky-btn{background:var(--ink);color:#fff}
+.sticky-btn:hover{background:var(--blue)}
+.count-band .cap{color:#93A6B8}
+
+/* 비교표는 다크 유지 — 대비 리듬 */
+.cmp .sec-title{color:#fff}
+
+/* 스크롤 프로그레스 컬러 유지, 토스트 라이트 */
+.toast{background:var(--ink)}
+
+/* ============================================================
+   V7 PREMIUM LAYER — 질감 · 그림자 · 여백 · 디테일
+   ============================================================ */
+:root{
+  /* 블루 틴트 소프트 섀도우 (회색 그림자보다 고급) */
+  --sh-1:0 1px 2px rgba(23,58,110,.04),0 6px 18px rgba(23,58,110,.06);
+  --sh-2:0 2px 6px rgba(23,58,110,.05),0 18px 44px rgba(23,58,110,.10);
+  --sh-3:0 6px 14px rgba(23,58,110,.07),0 34px 80px rgba(23,58,110,.16);
+  --line:#E6EDF5;
+}
+::selection{background:rgba(29,111,224,.16)}
+:focus-visible{outline:2.5px solid rgba(29,111,224,.55);outline-offset:2px;border-radius:6px}
+html{scroll-padding-top:156px}
+section[id],div[id="courses"]{scroll-margin-top:156px}
+
+/* ── 섹션 리듬: 헤어라인 대신 여백과 톤으로 구분 ── */
+section{padding:clamp(72px,10vw,128px) 0}
+.courses-sec,.faq-wrap,.proj{border-top:none;border-bottom:none}
+.proj{background:linear-gradient(180deg,#fff, #F6FAFE 20%, #F6FAFE 80%, #fff)}
+.faq-wrap{background:linear-gradient(180deg,#fff,#F6FAFE 25%)}
+.courses-sec{background:linear-gradient(180deg,#F6FAFE,#EEF5FC)}
+
+/* ── HERO 프리미엄: 레이어드 글로우 + 글래스 방패 ── */
+.hero{background:
+  radial-gradient(760px 420px at 82% 18%,rgba(47,168,232,.14),transparent 62%),
+  radial-gradient(560px 380px at 8% 88%,rgba(29,111,224,.10),transparent 60%),
+  linear-gradient(168deg,#FFFFFF 0%,#F2F8FE 44%,#E7F1FC 100%)}
+.hero h1 .acc{background:linear-gradient(92deg,#1D6FE0,#19A6D8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .bd{backdrop-filter:blur(6px);background:rgba(255,255,255,.82)}
+.hero-info{border-top-color:rgba(29,111,224,.22)}
+.hero-info dd b{font-size:18px}
+.shield{background:linear-gradient(158deg,rgba(29,111,224,.94),rgba(25,166,216,.9));backdrop-filter:blur(4px);animation:hover-y 5.5s ease-in-out infinite}
+@keyframes hover-y{50%{transform:translateX(-50%) translateY(-12px)}}
+.shield::before{content:"";position:absolute;inset:0;clip-path:inherit;background:linear-gradient(120deg,rgba(255,255,255,.35),transparent 42%)}
+.shield-shadow{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:170px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(23,58,110,.22),transparent 70%);animation:sh-scale 5.5s ease-in-out infinite}
+@keyframes sh-scale{50%{transform:translateX(-50%) scale(.88);opacity:.7}}
+.orb{animation-duration:6.5s;box-shadow:0 14px 34px rgba(23,58,110,.12)}
+@media (prefers-reduced-motion:reduce){.shield,.shield-shadow{animation:none}}
+
+/* ── 카드 질감: 상단광 + 헤어라인 ── */
+.news,.jd,.job,.care,.rev,.pcard,.stp-card,.mstat,.tcard,.fld,.wcard,.ccard{
+  background:linear-gradient(180deg,#FFFFFF,#FBFDFF);
+  border-color:var(--line)}
+.gcard{background:linear-gradient(150deg,#F0F7FE,#E2EFFC);border-color:rgba(29,111,224,.14)}
+.bstrip-in{background:linear-gradient(180deg,#FFFFFF,#F9FCFF);box-shadow:0 30px 70px rgba(23,58,110,.13),0 2px 6px rgba(23,58,110,.05)}
+.bstrip .it{transition:transform .3s var(--ease)}
+.bstrip .it:hover{transform:translateY(-3px)}
+
+/* ── 버튼: 내부 하이라이트 + 그라데이션 호버 ── */
+.hero-cta,.sticky-btn,.nav-cta,.btn-submit,.cbtn{box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 26px rgba(16,42,74,.18)}
+.cbtn{box-shadow:none}
+.hero-cta:hover,.sticky-btn:hover,.nav-cta:hover{background:linear-gradient(92deg,#1D6FE0,#19A6D8)}
+.btn-submit{background:linear-gradient(92deg,#1D6FE0,#1590CE)}
+.btn-submit:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 14px 34px rgba(29,111,224,.4)}
+
+/* ── 카운트다운 밴드: 딥 네이비 + 시안 엣지 글로우 ── */
+.count-band{background:linear-gradient(180deg,#0A1220,#0B1626);position:relative;margin-top:72px}
+.count-band::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(47,197,232,.7),transparent)}
+.cblock .n{background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border:1px solid rgba(140,180,220,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px rgba(0,0,0,.4)}
+
+/* ── 비교표: 프리미엄 다크 ── */
+.cmp{background:linear-gradient(180deg,#0A1220,#0D1830)}
+.cmp-table{border-radius:20px;border-color:rgba(140,180,220,.14)}
+.cmp-row.head{background:linear-gradient(90deg,#101B2E,#0F2036)}
+
+/* ── 과정 카드 헤더: 패턴 글로우 ── */
+.ccard-head{position:relative;overflow:hidden}
+.ccard-head::after{content:"";position:absolute;right:-46px;top:-46px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 66%)}
+.ccard-head::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px);background-size:20px 20px;opacity:.5;mask-image:linear-gradient(120deg,#000 20%,transparent 70%)}
+.ccard-head>*{position:relative;z-index:1}
+
+/* ── 서브내비/네비 글래스 강화 ── */
+.nav{background:rgba(255,255,255,.78);backdrop-filter:blur(18px) saturate(1.6)}
+.subnav{background:rgba(255,255,255,.88);backdrop-filter:blur(14px)}
+
+/* ── 폼 카드 프리미엄 ── */
+.form-card{background:linear-gradient(180deg,#FFFFFF,#FAFCFF);box-shadow:0 40px 100px rgba(23,58,110,.16),0 3px 8px rgba(23,58,110,.05)}
+.f-group input,.f-group select,.f-group textarea{background:#F7FAFD}
+.f-group input:hover,.f-group select:hover,.f-group textarea:hover{border-color:#C9D9EA}
+.consent{background:#F7FAFD}
+
+/* ── 티커: 라이트 프리미엄 ── */
+.ticker{background:linear-gradient(180deg,#FDFEFF,#F7FBFF);border-bottom:1px solid var(--line)}
+.ticker span{background:#fff;box-shadow:var(--sh-1)}
+
+/* ── 스텝/개요 리스트 헤어라인 정돈 ── */
+.ovlist{border-top-width:2px}
+.ovrow{border-bottom-color:var(--line)}
+.steps{gap:16px}
+.stp-card .no{border-color:rgba(29,111,224,.28);background:rgba(29,111,224,.05)}
+
+/* ── 푸터: 정돈된 마감 ── */
+footer{background:#0C111A;color:#8CA0B4;border:none;padding:56px 0 150px}
+footer .f-brand{color:#E8F0F8;display:flex;align-items:center;gap:8px}
+footer p{font-size:12.5px;line-height:1.9}
+
+/* ── 스크롤바 (WebKit) 절제된 커스텀 ── */
+::-webkit-scrollbar{width:11px}
+::-webkit-scrollbar-thumb{background:#C6D5E5;border:3px solid #fff;border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:#A9BFD6}
+
+/* ── V8: 코드잇 실물 구조 반영 ── */
+.money-cards{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.money-cards{grid-template-columns:1fr}}
+.mcard{position:relative;background:linear-gradient(160deg,#F0F7FE,#E1EEFB);border:1px solid rgba(29,111,224,.16);border-radius:20px;padding:32px 34px;box-shadow:var(--sh-1);overflow:hidden}
+.mcard::after{content:"";position:absolute;right:-52px;top:-52px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(29,111,224,.12),transparent 68%)}
+.mtag{display:inline-block;font-size:12px;font-weight:800;color:#fff;background:var(--blue);border-radius:999px;padding:5px 14px;margin-bottom:16px}
+.mstrike{font-size:15px;color:var(--ink-2);text-decoration:line-through}
+.mcard h3{margin-top:4px;font-size:clamp(21px,2.3vw,26px);font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.mcard h3 em{display:block;font-style:normal;font-size:14px;font-weight:800;color:var(--blue);margin-top:6px}
+.mdesc{margin-top:14px;font-size:13.5px;color:var(--ink-2);line-height:1.75;max-width:380px}
+.mfn{margin-top:10px;font-size:11.5px;color:var(--ink-2)}
+
+.prac{margin-top:16px;background:#F2F8FE;border:1px solid rgba(29,111,224,.14);border-radius:12px;padding:16px 18px}
+.prac b{display:inline-block;font-size:11.5px;font-weight:800;color:#fff;background:var(--blue);border-radius:6px;padding:3px 10px;margin-bottom:8px}
+.prac ul{list-style:none}
+.prac li{position:relative;padding-left:16px;font-size:13.5px;color:var(--ink);line-height:1.75}
+.prac li::before{content:"·";position:absolute;left:3px;color:var(--blue);font-weight:800}
+
+.intern-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:820px){.intern-grid{grid-template-columns:1fr}}
+.icard{background:linear-gradient(180deg,#fff,#FAFCFF);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--sh-1);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.icard:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}
+.itag{display:inline-block;font-size:11.5px;font-weight:800;color:var(--blue);background:rgba(29,111,224,.08);border:1px solid rgba(29,111,224,.2);border-radius:999px;padding:4px 12px}
+.icard h4{margin:12px 0 8px;font-size:17px;font-weight:800;color:var(--ink)}
+.icard p{font-size:13.5px;color:var(--ink-2);line-height:1.75}
+.grant .intern-grid + .stipend{margin-top:16px}
+
+/* V9: 과정 카드 버튼 행 */
+.cbtn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.cbtn-row .cbtn{margin-top:0}
+.cbtn.link{display:inline-flex;align-items:center;justify-content:center;text-align:center;background:var(--ink);color:#fff;border-color:var(--ink)}
+.cbtn.link:hover{background:var(--blue);border-color:var(--blue)}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<defs><g id="_s" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></g></defs>
+<symbol id="i-shield" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8 10.5V8a4 4 0 018 0v2.5"/><circle cx="12" cy="15.3" r="1.4" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-won" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="9"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 9l1.7 6L11 9l2.3 6L15 9M6.6 12h10.8"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="4" y="9" width="16" height="11" rx="2"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 9v11M4 13h16M8.5 9C7 9 6 8 6 6.8 6 5.5 7 5 8 5c1.8 0 3 2 4 4 1-2 2.2-4 4-4 1 0 2 .5 2 1.8C18 8 17 9 15.5 9h-7z"/></symbol>
+<symbol id="i-laptop" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="5" y="5" width="14" height="10" rx="1.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M3 19h18"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M10 20v-5.5h4V20"/></symbol>
+<symbol id="i-medal" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="9" r="5.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8.5 13.5L7 21l5-2.5L17 21l-1.5-7.5M12 6.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-1-1.8 1 .3-2L9.1 8.6l2-.3.9-1.8z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="9" cy="8.5" r="3.2"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M15.5 5.8a3.2 3.2 0 010 5.9M17.5 14.7c1.7.6 2.7 2 3 4.3"/></symbol>
+<symbol id="i-tool" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14.5 6.5a4 4 0 015.4-.9l-3.2 3.2 2.5 2.5 3.2-3.2a4 4 0 01-5.6 5.3L8 22l-3-3 8.5-8.5a4 4 0 011-4z" transform="scale(.86) translate(1.8 1.8)"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3l9 5-9 5-9-5 9-5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 12.5L12 17l8.5-4.5M3.5 16.5L12 21l8.5-4.5"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="8.5"/><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="9"/><path fill="currentColor" stroke="none" d="M10 8.5l6 3.5-6 3.5v-7z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 12a8 8 0 01-11.6 7.1L4 20l1-4.3A8 8 0 1120 12z"/><path stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M8.6 12h.01M12 12h.01M15.4 12h.01"/></symbol>
+<symbol id="i-rocket" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15c-1.5-4.5 0-9 4.5-11.5 1.3 1 2.3 2.4 2.8 4C17 12 14.5 14.5 12 15zM12 15l-3-3M9.5 12.5c-2 .3-3.5 1.5-4.5 4 2.5-1 3.7.2 3 2.5 2.5-1 3.7-2.5 4-4.5"/><circle fill="none" stroke="currentColor" stroke-width="1.6" cx="15.2" cy="8.8" r="1.4"/></symbol>
+<symbol id="i-badge" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="4.5" y="4" width="15" height="16" rx="2"/><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="10" r="2.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8 16.5c.8-1.8 2.3-2.6 4-2.6s3.2.8 4 2.6"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M6 3.5h8l4 4V20.5H6v-17z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M14 3.5v4h4M9 12h6M9 15.5h6M9 8.5h2.5"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 4L2.8 19.5h18.4L12 4z"/><path stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M12 10v4.2"/><circle cx="12" cy="16.8" r="1.1" fill="currentColor"/></symbol>
+<symbol id="i-radar" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="8.5"/><circle fill="none" stroke="currentColor" stroke-width="1.4" cx="12" cy="12" r="4.8" opacity=".6"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 12l5.5-5.5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="10.5" cy="10.5" r="6"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M15 15l5.5 5.5M8 10.5h5M10.5 8v5"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="4" y="4.5" width="16" height="6.5" rx="1.5"/><rect fill="none" stroke="currentColor" stroke-width="1.8" x="4" y="13" width="16" height="6.5" rx="1.5"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7.3 7.8h.01M7.3 16.3h.01"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 11v2"/></symbol>
+<symbol id="i-bank" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 9L12 4l8.5 5v1.5h-17V9z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5.5 10.5V17M9.8 10.5V17M14.2 10.5V17M18.5 10.5V17M3.5 19.5h17"/></symbol>
+<symbol id="i-game" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M7 7h10a5 5 0 015 5.3c-.2 2.6-1 4.7-2.4 4.7-1.2 0-1.8-.9-2.6-1.8-.6-.8-1.4-1.2-2.5-1.2h-5c-1.1 0-1.9.4-2.5 1.2-.8.9-1.4 1.8-2.6 1.8C3 17 2.2 14.9 2 12.3A5 5 0 017 7z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11" r="1" fill="currentColor"/><circle cx="17.8" cy="13" r="1" fill="currentColor"/></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3.5 4.5H6l2.2 11h10.3l2-8H7"/><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="9.5" cy="19" r="1.6"/><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="16.5" cy="19" r="1.6"/></symbol>
+<symbol id="i-gov" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3.5l7.5 4h-15l7.5-4z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5.5 9.5V16M12 9.5V16M18.5 9.5V16M4 19.5h16M12 3.5v-1"/></symbol>
+<symbol id="i-med" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="4" y="6" width="16" height="14" rx="2"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M9.5 6V4.5h5V6M12 10.5v5M9.5 13h5"/></symbol>
+<symbol id="i-factory" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 20V8l5.5 3.5V8l5.5 3.5V8l5 3v9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8 16.5h1.5M12 16.5h1.5M16 16.5h1.5"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 18a4.5 4.5 0 01-.6-8.96A6 6 0 0118 10.5 3.75 3.75 0 0117.3 18H7z"/></symbol>
+<symbol id="i-monitor" viewBox="0 0 24 24"><rect fill="none" stroke="currentColor" stroke-width="1.8" x="3.5" y="4.5" width="17" height="11.5" rx="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M9.5 19.5h5M12 16v3.5"/></symbol>
+<symbol id="i-signal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 10.5a9.5 9.5 0 0114 0M7.8 13.5a5.6 5.6 0 018.4 0"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="8.5"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M3.5 12h17M12 3.5c2.6 2.3 3.9 5.1 3.9 8.5s-1.3 6.2-3.9 8.5c-2.6-2.3-3.9-5.1-3.9-8.5S9.4 5.8 12 3.5z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle fill="none" stroke="currentColor" stroke-width="1.8" cx="12" cy="12" r="8.5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 7.5V12l3 2"/></symbol>
+</svg>
+
+<script>
+/* ============================================================
+   ★★★ 운영 설정 — 여기만 수정 ★★★
+   SHEETS_WEBHOOK_URL : 구글 Apps Script 배포 URL (연동_설정_가이드.md 참고)
+   ============================================================ */
+const CONFIG = {
+  SHEETS_WEBHOOK_URL: "",                              // ← Apps Script 웹 앱 URL
+  COHORT: "14기",
+  DEADLINE: "2026-07-20T23:59:59+09:00",               // 모집 마감 (영상 확인: ~2026-07-20(월) 23:59)
+  RECRUIT_TXT: "~ 2026. 07. 20. (월) 23:59",
+  COURSE_TXT: "2026. 07. 21. ~ 2026. 12. 03.",
+  SEATS: 80                                             // 선발 인원 (영상 확인: 80명)
+};
+</script>
+
+<!-- ===================== 띠배너 + NAV ===================== -->
+<div class="topbar" onclick="goApply()"><svg class="i" aria-hidden="true"><use href="#i-gift"/></svg> 지금 지원하면 <b>고사양 노트북·웹캠 무상 대여</b> + 매월 훈련장려금 — 14기 선착순 접수 중</div>
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg> EST GUARDIANS <em>이스트캠프</em></a>
+    <div class="course-tabs">
+      <a class="ct on" href="index.html">인프라보안 <i>모집 중</i></a>
+      <a class="ct" href="quant.html">AI 퀀트 <i>모집 중</i></a>
+      <a class="ct" href="human.html">AI 휴먼 <i>모집 중</i></a>
+    </div>
+    <button class="nav-cta" onclick="goApply()">지원하기</button>
+  </div>
+</nav>
+<div class="subnav" id="subnav">
+  <div class="subnav-in" id="nav-tabs">
+    <a href="#curriculum">커리큘럼</a>
+    <a href="#jobs">취업분야</a>
+    <a href="#benefit">수강혜택</a>
+    <a href="#courses">다른 과정</a>
+    <a href="#process">선발절차</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="top">
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <div class="badges">
+        <span class="bd">K-디지털 트레이닝</span>
+        <span class="bd">100% 실시간 비대면</span>
+        <span class="bd hot">14기 선발 80명</span>
+      </div>
+      <p class="hero-eyebrow">해킹이 늘어날수록 커지는 수요, 지금이 기회!</p>
+      <h1>가디언즈<br><span class="acc">인프라보안</span> 부트캠프</h1>
+      <p class="lead">이스트소프트 전현직 인프라 보안 실무자가 설계한 진짜 현업 과정 — 정보보호 및 보안 인프라 운영 관리 14기</p>
+      <dl class="hero-info">
+        <div><dt>수강 기간</dt><dd>26.07.21 ~ 26.12.03</dd></div>
+        <div><dt>수업 시간</dt><dd>월–금 9 to 6 (온라인)</dd></div>
+        <div><dt>모집 기간</dt><dd>26.07.20 까지 <em>선착순 마감</em></dd></div>
+        <div><dt>수강료</dt><dd><s>1,300만 원 상당</s> <b>0원</b></dd></div>
+      </dl>
+      <button class="hero-cta" onclick="goApply()">지원하기</button>
+    </div>
+    <div class="shield-stage" aria-hidden="true">
+      <div class="orb o1"><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg></div><div class="orb o2"><svg class="i" aria-hidden="true"><use href="#i-server"/></svg></div>
+      <div class="orb o3"><svg class="i" aria-hidden="true"><use href="#i-signal"/></svg></div><div class="orb o4"><svg class="i" aria-hidden="true"><use href="#i-globe"/></svg></div>
+      <div class="shield"><div class="lock"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg></div></div>
+      <div class="shield-shadow"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== 혜택 스트립 (코드잇 장치) ===================== -->
+<div class="bstrip">
+  <div class="bstrip-in">
+    <span class="cap">수강생 전원<br>특별 혜택!</span>
+    <div class="items">
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-won"/></svg></div>수강료<br>전액 지원</div>
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-gift"/></svg></div>매월<br>훈련장려금</div>
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-laptop"/></svg></div>고사양 노트북<br>무상 대여</div>
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg></div>학습 공간<br>지원</div>
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-medal"/></svg></div>수료생<br>서류전형 우대</div>
+      <div class="it"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg></div>KDT<br>인턴십</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 카운트다운 (가디언즈 원본 재현) ===================== -->
+<div class="count-band">
+  <div class="wrap">
+    <p class="cap"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>14기 모집 마감 <b id="cap-date">2026. 07. 20. (월) 23:59</b> 까지</p>
+    <div class="count-grid">
+      <div class="cblock"><div class="n" id="cd-d">--</div><div class="l">Days</div></div>
+      <div class="cblock"><div class="n" id="cd-h">--</div><div class="l">Hours</div></div>
+      <div class="cblock"><div class="n" id="cd-m">--</div><div class="l">Minutes</div></div>
+      <div class="cblock"><div class="n" id="cd-s">--</div><div class="l">Seconds</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 기술 키워드 티커 ===================== -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker-track">
+    <span><b>FW</b> 방화벽 운영</span><span><b>IPS/IDS</b> 침입 탐지</span><span><b>모의해킹</b> Penetration Test</span><span><b>패킷분석</b> Wireshark</span><span><b>SIEM</b> Splunk · ELK</span><span><b>WAF</b> 웹 방화벽</span><span><b>ISMS</b> 정보보호 관리체계</span><span><b>IT GRC</b> 보안 거버넌스</span><span><b>서비스보안</b> WEB · DNS · Mail</span><span><b>침해대응</b> CERT</span>
+  </div>
+</div>
+
+<!-- ===================== 시장 근거 (코드잇 장치) ===================== -->
+<section>
+  <div class="wrap">
+    <span class="qnum">QUESTION 01</span>
+    <h2 class="sec-title">왜 지금,<br>보안으로 시작해야 할까요?</h2>
+    <p class="sec-sub">침해사고가 뉴스가 되는 시대 — 해킹이 늘어날수록 시스템을 지킬 사람의 몸값은 올라갑니다.</p>
+    <div class="news-grid">
+      <div class="news"><span class="tag">TREND</span><h3>대형 침해사고가 반복될수록 커지는 보안 조직</h3><p>개인정보 유출·랜섬웨어 사고가 이어지며 기업마다 보안 인력·예산을 늘리는 추세입니다.</p></div>
+      <div class="news"><span class="tag">DEMAND</span><h3>정보보호 인력, 만성적인 공급 부족</h3><p>수요 대비 준비된 실무 인력이 부족해, 실습 기반 역량을 갖춘 신입에게 기회가 열려 있습니다.</p></div>
+      <div class="news"><span class="tag">CAREER</span><h3>한 번 쌓으면 오래가는 인프라 보안 커리어</h3><p>유행 타는 스택이 아닌 네트워크·시스템·보안 아키텍처 — 연차가 쌓일수록 가치가 커지는 분야입니다.</p></div>
+    </div>
+    <div class="market-stats">
+      <div class="mstat"><b data-count="1300" data-suffix="만원+">0만원+</b><span>1인당 지원 규모 (수강료·장비·장려금)</span></div>
+      <div class="mstat"><b data-count="100" data-suffix="%">0%</b><span>실시간 비대면 강의 · 9 to 6</span></div>
+      <div class="mstat"><b data-count="80" data-suffix="명">0명</b><span>14기 선발 인원 · 스펙 무관 선발</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Q2: 무엇이 필요한가 (코드잇 장치) ===================== -->
+<section style="background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <span class="qnum">QUESTION 02</span>
+    <h2 class="sec-title">그 기회를 잡으려면,<br>무엇이 필요할까요?</h2>
+    <p class="sec-sub">국내 기업의 정보보안 채용 공고를 열어보면, 요구 역량은 놀랍도록 일관됩니다.<br>가디언즈 커리큘럼은 그 요구사항에서 역산해 설계됐습니다.</p>
+
+    <div class="jd-grid">
+      <div class="jd"><div class="role">보안 엔지니어 채용 공고에서</div>
+        <ul><li>방화벽(FW)·IPS/IDS·WAF 운영 경험</li><li>네트워크 프로토콜에 대한 이해</li><li>보안 시스템 구축·운영 가능자</li></ul>
+        <div class="match">✓ PHASE 2 — 보안 인프라 운영 관리에서 전부 다룹니다</div></div>
+      <div class="jd"><div class="role">보안 관제·CERT 채용 공고에서</div>
+        <ul><li>SIEM(Splunk·ELK) 활용 능력</li><li>침해사고 분석·대응 프로세스 이해</li><li>패킷 분석 및 로그 해석 역량</li></ul>
+        <div class="match">✓ PHASE 2 실습 + 통합 프로젝트로 포트폴리오화합니다</div></div>
+      <div class="jd"><div class="role">보안 컨설턴트·GRC 채용 공고에서</div>
+        <ul><li>ISMS 인증 기준에 대한 이해</li><li>취약점 진단·모의해킹 수행 경험</li><li>개인정보보호 법규 지식</li></ul>
+        <div class="match">✓ PHASE 3 — 기업 정보 보호 관리에서 전부 다룹니다</div></div>
+    </div>
+    <p class="jd-note">* 국내 주요 채용 플랫폼의 정보보안 직군 공고에서 공통적으로 요구되는 역량을 정리한 것입니다.</p>
+
+    <h3 style="margin-top:56px;font-size:21px;font-weight:800">처음 듣는 용어라도 괜찮습니다</h3>
+    <div class="term-grid">
+      <div class="tcard"><b>모의해킹</b><span>허가를 받고 해커처럼 직접 공격해서, 뚫리기 전에 약점을 찾아내는 일</span></div>
+      <div class="tcard"><b>보안 관제 (SIEM)</b><span>시스템 곳곳의 기록을 한 화면에 모아 침입 징후를 실시간으로 감시하는 일</span></div>
+      <div class="tcard"><b>ISMS · GRC</b><span>기업이 정보를 안전하게 다루도록 규칙과 체계를 세우고 점검하는 일</span></div>
+    </div>
+
+    <h3 style="margin-top:56px;font-size:21px;font-weight:800">이 역량 하나로, 갈 수 있는 산업이 이만큼 넓어집니다</h3>
+    <div class="field-grid">
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-bank"/></svg></div><b>금융</b><span>이상거래 탐지<br>망분리 보안</span></div>
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-game"/></svg></div><b>게임</b><span>계정 도용·핵<br>탐지 대응</span></div>
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-cart"/></svg></div><b>커머스</b><span>개인정보 보호<br>결제 보안</span></div>
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-gov"/></svg></div><b>공공</b><span>주요 기반시설<br>보안 관제</span></div>
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-med"/></svg></div><b>의료</b><span>환자정보 보호<br>ISMS 인증</span></div>
+      <div class="fld"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-factory"/></svg></div><b>제조</b><span>OT/공장망<br>보안 운영</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5가지 이유 (가디언즈 원본) ===================== -->
+<section class="why">
+  <div class="wrap center">
+    <h2 class="sec-title">이스트캠프에<br>참여해야 하는 5가지 이유</h2>
+    <div class="why-grid">
+      <div class="wcard"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-won"/></svg></div><h3>1,300만원 이상<br>지원금 혜택</h3><p>수강료·교육장비·장려금 지원으로 학습에만 몰입!</p></div>
+      <div class="wcard"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg></div><h3>자체 인턴십 &<br>계열사 연계</h3><p>교육 회사가 아니라 AI 선도 기업이 직접 진행하는 교육! 수료 후 실전 기회로 바로 이어져요.</p></div>
+      <div class="wcard"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-tool"/></svg></div><h3>전현직 인프라 보안<br>실무자가 설계한<br>'진짜 현업 과정'</h3><p>실무에 바로 쓰는 보안 역량 개발.</p></div>
+      <div class="wcard"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-layers"/></svg></div><h3>서비스 기반 A-Z<br>통합 프로젝트</h3><p>이론이 아닌 실제 '운영 중인 서비스'로 끝까지 완성해요.</p></div>
+      <div class="wcard"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-target"/></svg></div><h3>현업 중심 실시간<br>교육 + 1:1 관리</h3><p>누구보다 가까운 실무진의 코칭으로, 밀착 케어 학습 환경.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 수강생/수료생 혜택 ===================== -->
+<section class="grant" id="benefit">
+  <div class="wrap center">
+    <h2 class="sec-title">이스트캠프 수강생에게<br>주어지는 특별한 혜택!</h2>
+    <div class="grant-grid" style="text-align:left">
+      <div class="gcard"><div class="glow"></div><span class="pill">모든 수강생</span><h3>1천 3백만원 상당<br>수업료 국비 지원</h3><p>K-디지털 트레이닝으로 수강료 전액 지원. 고사양 노트북·웹캠 무상 대여와 학습 공간 지원까지.</p></div>
+      <div class="gcard"><div class="glow"></div><span class="pill">모든 수료생</span><h3>서류전형 우대<br>+ KDT 인턴십</h3><p>계열사 지원 시 서류전형 우대, 면접 전형 통과 시 KDT 인턴십 진행. 교육이 채용 트랙으로 이어집니다.</p></div>
+    </div>
+    <div class="intern-grid" style="text-align:left">
+      <div class="icard"><span class="itag">이스트소프트 패밀리</span><h4>계열사 기업풀 연계</h4><p>교육 회사가 아니라 AI 선도 기업이 직접 운영 — 수료 후 실전 기회로 바로 이어집니다.</p></div>
+      <div class="icard"><span class="itag">모든 수료생</span><h4>서류전형 우대</h4><p>계열사 지원 시 서류전형 우대 — 첫 관문에서부터 출발선이 다릅니다.</p></div>
+      <div class="icard"><span class="itag">면접 전형 통과 시</span><h4>KDT 인턴십 진행</h4><p>단순 수료로 끝나지 않고, 이력서에 남는 실무 경력의 첫 줄을 만듭니다.</p></div>
+    </div>
+    <div class="stipend" style="text-align:left">
+      <h4><svg class="i" aria-hidden="true"><use href="#i-won"/></svg> 훈련장려금 — <b>출석 요건 충족 시 매월 지급</b></h4>
+      <ul>
+        <li>실업자</li>
+        <li>주 15시간 미만(월 60시간 미만) 고용보험 가입 근로자</li>
+        <li>고용보험 가입 자영업자 (사업자등록증 보유)</li>
+        <li>무보수인 고유번호증 단체의 대표자</li>
+      </ul>
+      <p class="note">* 지급액은 개인별로 다를 수 있으며, 출결 확인 후 고용센터에서 지급됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 모집 개요 (원본 실데이터) ===================== -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">OVERVIEW</span>
+    <h2 class="sec-title">교육과정 한 눈에 보기</h2>
+    <dl class="ovlist">
+      <div class="ovrow"><dt>교육명</dt><dd>[이스트캠프] 가디언즈 정보보호 및 보안 인프라 운영 관리 14기</dd></div>
+      <div class="ovrow"><dt>주요 커리큘럼</dt><dd>Architecture(Security & Infra), FW, IPS/IDS, 모의해킹, 패킷분석, 서비스보안(WEB, DNS, DHCP, Mail, FTP 외), IT GRC
+        <div class="tags"><span>모의해킹</span><span>패킷분석</span><span>FW·IPS/IDS</span><span>서비스보안</span><span>IT GRC</span></div></dd></div>
+      <div class="ovrow em"><dt>모집 기간</dt><dd id="ov-recruit">-</dd></div>
+      <div class="ovrow"><dt>교육 기간</dt><dd id="ov-course">-</dd></div>
+      <div class="ovrow"><dt>교육 방식</dt><dd>100% 실시간 비대면 강의, 9 to 6<small>* 실시간으로 진행되는 교육으로 학업, 직장 등과 병행이 어려워요.</small></dd></div>
+      <div class="ovrow"><dt>선발 인원</dt><dd id="ov-seats">-</dd></div>
+      <div class="ovrow"><dt>선발 기준</dt><dd>스펙과 관계 없이 지원서 내용을 토대로 적합 여부를 고려하여 선발</dd></div>
+      <div class="ovrow"><dt>지원 대상</dt><dd>
+        국민내일배움카드 보유 혹은 발급 가능한 분<small>* 교육 시작일까지 국민내일배움카드 미보유 시 합격 취소</small>
+        <small>· 5년 이내 K-Digital Training 과정 수강 이력이 없는 분<br>· 교육 과정에 열정을 가지고 평일 09:00~18:00 풀타임 교육 참여 가능한 분<br>· 졸업 예정자일 경우 졸업까지 남은 수업 연한이 2년 이내인 분<br>&nbsp;&nbsp;(4년제 2학년 2학기 종료 / 3년제 1학년 2학기 종료 / 2년제 1학년 입학 시부터 지원 가능)</small></dd></div>
+    </dl>
+    <div class="money-cards">
+      <div class="mcard">
+        <span class="mtag">국민내일배움카드</span>
+        <p class="mstrike">13,000,000원 상당</p>
+        <h3>수강료 전액 지원<em>본인 부담금 0원</em></h3>
+        <p class="mdesc">K-디지털 트레이닝으로 수강료가 전액 지원되고, 고사양 노트북·웹캠 대여와 학습 공간 지원까지 포함됩니다.</p>
+      </div>
+      <div class="mcard">
+        <span class="mtag">출석만 해도 매월 계좌로!</span>
+        <p class="mstrike" style="visibility:hidden">-</p>
+        <h3>훈련장려금<em>매월 지급 · 별도 신청 불필요</em></h3>
+        <p class="mdesc">단위기간 출석 요건 충족 시 고용센터에서 자동 지급됩니다. 지급 계좌·현황은 고용24(HRD-Net)에서 확인할 수 있어요.</p>
+        <p class="mfn">* 훈련장려금은 대상 요건·출석 일수에 따라 상이할 수 있어요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 커리큘럼 ===================== -->
+<section id="curriculum" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow">CURRICULUM</span>
+    <h2 class="sec-title">아무것도 몰라도, 따라오면 됩니다</h2>
+    <p class="sec-sub">IT 인프라의 기초부터 기업 정보 보호 관리까지 — 실무 순서 그대로 밟는 로드맵.</p>
+    <div class="curri-flow">
+      <div class="cmod">
+        <div class="wk">PHASE 1<b>IT 인프라의 이해</b></div>
+        <div>
+          <h3>보안의 기초 체력 — 시스템과 네트워크</h3>
+          <p>IT 인프라 이해를 위한 시스템 및 네트워크 보안 구성 기초를 학습하고, 실제 활용되는 아키텍처 사례를 다룹니다. IT 서비스(WEB, DNS, DHCP, SMB, Mail, FTP, CDN 등)의 구성과 동작, 사용 중 취약점 이해와 이를 보완할 서비스 관리 보안까지 학습합니다.</p>
+          <div class="skills"><span>리눅스/윈도우 시스템 운영</span><span>Log 해석 및 분석</span><span>서비스 구성·운영</span><span>시스템·서비스 보안 관리</span></div>
+          <div class="prac"><b>실습</b><ul><li>가상화 환경에 리눅스 서버를 직접 구축하고 서비스 구성하기</li><li>시스템 로그를 해석해 이상 징후 찾아내기</li></ul></div>
+        </div>
+      </div>
+      <div class="cmod">
+        <div class="wk">PHASE 2<b>보안 인프라 운영 관리</b></div>
+        <div>
+          <h3>공격을 알고, 방어 시스템을 설계하다</h3>
+          <p>보안 시스템(FW, DDOS, IPS, WAF, SSL Inspection, WIPS 등)의 종류와 기능을 이해하며 보안 시스템 아키텍처 설계/구축을 진행합니다. 해킹 종류와 기술적 이해, 침해 사고 대응/분석을 학습하여 보안 관제 시스템과 악성 공격, Credential Stuffing 탐지 등 관리적 보안 시스템 운영을 익힙니다.</p>
+          <div class="skills"><span>네트워크 공격 패킷 분석·모의해킹</span><span>통합위협탐지·보안관제 (Splunk, Elasticsearch, Logstash, Kibana)</span><span>네트워크 설계·프로토콜</span><span>DB 서버 운영·보안</span></div>
+          <div class="prac"><b>실습</b><ul><li>공격 패킷을 캡처·분석하고 모의해킹 시나리오 수행하기</li><li>Splunk·ELK로 통합 위협탐지 관제 환경 구성하기</li><li>Credential Stuffing 등 악성 공격 탐지 룰 만들기</li></ul></div>
+        </div>
+      </div>
+      <div class="cmod">
+        <div class="wk">PHASE 3<b>기업 정보 보호 관리</b></div>
+        <div>
+          <h3>기술을 넘어, 기업의 보안 체계를 다루다</h3>
+          <p>정보 보호 관리체계(ISMS)의 관리 체계를 학습하고, IT 비즈니스에 필요한 보안성 평가(시스템 취약점 진단 및 WEB, Android/iOS 모의 해킹)를 수행합니다. 기업 정보 보안 지침 구축(GRC)에 대한 사례 연구와 개인정보 보호의 전 단계 — 수집부터 보유·이용·제공·파기까지 — 를 실무 수준으로 다룹니다.</p>
+          <div class="skills"><span>ISMS 관리체계</span><span>취약점 진단·모의해킹</span><span>IT GRC</span><span>개인정보보호</span></div>
+          <div class="prac"><b>실습</b><ul><li>시스템 취약점 진단과 WEB·모바일 모의해킹 수행하기</li><li>ISMS 기준으로 보안성 평가 보고서 작성하기</li></ul></div>
+        </div>
+      </div>
+      <div class="cmod">
+        <div class="wk">FINAL<b>통합 프로젝트</b></div>
+        <div>
+          <h3>서비스 기반 A-Z 통합 프로젝트</h3>
+          <p>이론이 아닌 실제 '운영 중인 서비스'를 기반으로 인프라 구성부터 보안 아키텍처 설계, 취약점 진단과 모의해킹, 보고서 작성까지 — 취업 포트폴리오가 되는 프로젝트로 과정을 완성합니다.</p>
+          <div class="skills"><span>인프라 아키텍처 설계</span><span>취약점 진단 보고서</span><span>보안관제 대시보드</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="curri-note">* 세부 커리큘럼은 운영 상황에 따라 일부 조정될 수 있습니다.</p>
+  </div>
+</section>
+
+<!-- ===================== 프로젝트 소개 ===================== -->
+<section class="proj">
+  <div class="wrap">
+    <span class="eyebrow">PROJECT</span>
+    <h2 class="sec-title">이론만 배우지 않아요,<br>실무를 증명하는 프로젝트</h2>
+    <div class="proj-grid">
+      <div class="pcard"><span class="stp">STEP 1 | 기초</span><h3>기업 네트워크 인프라<br>설계·구축</h3><p>실제 기업 환경 수준의 네트워크 구성도를 직접 설계하고 보안 장비를 배치합니다.</p>
+        <div class="mock"><span class="dim">[topology]</span> internet → FW → IPS<br>├─ DMZ : WEB / DNS / Mail<br>└─ internal : DB / AD ✓</div></div>
+      <div class="pcard"><span class="stp">STEP 2 | 심화</span><h3>통합 보안관제<br>대시보드 구축</h3><p>Splunk·ELK Stack 기반 위협탐지 시스템으로 실시간 관제 환경을 구성합니다.</p>
+        <div class="mock"><span class="dim">[SIEM]</span> elasticsearch · kibana<br>alerts(24h): 137 <span class="dim">→ triage</span><br>credential stuffing 탐지 ✓</div></div>
+      <div class="pcard"><span class="stp">STEP 3 | 실전</span><h3>취약점 진단 &<br>모의해킹 보고서</h3><p>시스템·웹 취약점을 진단하고 침투 테스트를 수행, 현업 양식의 보고서로 완성합니다.</p>
+        <div class="mock"><span class="dim">[report]</span> 진단 항목 42건<br>High 3 · Med 11 · Low 9<br>조치 권고안 작성 완료 ✓</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 취업분야 (원본 6종) ===================== -->
+<section id="jobs">
+  <div class="wrap">
+    <span class="eyebrow">CAREER PATH</span>
+    <h2 class="sec-title">수업 후 취업분야</h2>
+    <div class="job-grid">
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-badge"/></svg> 기업 정보보안 관리자</h3><p>기업의 정보보호 정책을 수립하고, 보안 인프라를 운영 및 관리하는 전문 관리자</p></div>
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-doc"/></svg> 보안 컨설턴트</h3><p>조직의 보안 취약점을 분석하고 맞춤형 보안 전략과 솔루션을 제안하는 전문가</p></div>
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg> 침해사고 대응 전문가(CERT)</h3><p>위협탐지기술(Splunk, ELK Stack) 등을 활용하여 침해 원인을 분석하고, 대응 및 재발 방지 조치를 수행하는 전문가</p></div>
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-radar"/></svg> 사이버 위협 분석가</h3><p>최신 보안 위협과 공격 기법을 연구하고, 위협 인텔리전스·패킷 분석·침해지표(IoC) 분석으로 보안 체계를 강화하는 전문가</p></div>
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-scan"/></svg> 취약점 연구원</h3><p>시스템 및 애플리케이션의 보안 취약점을 연구하고, 이를 악용한 공격 시나리오를 분석하는 전문가</p></div>
+      <div class="job"><h3><svg class="i" aria-hidden="true"><use href="#i-server"/></svg> 보안 엔지니어</h3><p>방화벽(FW), IDS/IPS, WAF, SIEM, EDR 등 보안 시스템을 설계·구축·운영하며 기업의 IT 인프라를 보호하는 전문가</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 비교표 (코드잇 장치) ===================== -->
+<section class="cmp on-dark">
+  <div class="wrap">
+    <span class="eyebrow">COMPARE</span>
+    <h2 class="sec-title">직접 비교해 보세요,<br>확실히 다릅니다</h2>
+    <div class="cmp-table">
+      <div class="cmp-row head"><div class="l">일반 보안 인강·부트캠프</div><div class="r"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg> 이스트캠프 가디언즈</div></div>
+      <div class="cmp-row"><div class="l x">외부 강사 특강을 짜깁기한 커리큘럼</div><div class="r o">전현직 인프라 보안 실무자가 전 과정을 직접 설계·강의</div></div>
+      <div class="cmp-row"><div class="l x">녹화 강의 몰아보기, 질문은 게시판으로</div><div class="r o">100% 실시간 비대면 — 막히면 그 자리에서 해결 + 1:1 관리</div></div>
+      <div class="cmp-row"><div class="l x">실습 장비·환경은 개인 부담</div><div class="r o">고사양 노트북·웹캠 무상 대여 + 학습 공간 지원</div></div>
+      <div class="cmp-row"><div class="l x">이론 위주, 포트폴리오는 알아서</div><div class="r o">운영 중인 서비스 기반 A-Z 통합 프로젝트로 포트폴리오 완성</div></div>
+      <div class="cmp-row"><div class="l x">수료증 발급으로 끝</div><div class="r o">수료생 서류전형 우대 + 면접 통과 시 KDT 인턴십 진행</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Q3: 불안 호명 (코드잇 장치) ===================== -->
+<section class="anx">
+  <div class="wrap center">
+    <span class="qnum">QUESTION 03</span>
+    <h2 class="sec-title">비전공자인데,<br>따라가지 못할까 걱정되나요?</h2>
+    <p class="anx-lead">그 걱정, 매 기수 가장 많이 듣는 질문입니다. 그래서 시스템으로 준비했습니다.<br><b>사전 설문으로 여러분의 출발점을 파악해 커리큘럼을 구성하고</b>, 빠지면 증빙 제출로 출결정정 + 교안 제공 + 강사·멘토가 진도를 따라잡게 돕습니다.<br>기존 다수의 비전공자를 교육한 경험이 그 근거입니다.</p>
+  </div>
+</section>
+
+<!-- ===================== 카테고리별 후기 (코드잇 장치) ===================== -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">REVIEWS</span>
+    <h2 class="sec-title">걱정하는 그 지점마다,<br>먼저 겪은 가디언즈의 답이 있습니다</h2>
+    <div class="rev-grid">
+      <div class="rev"><span class="cat">커리큘럼 만족도</span><p>"비전공자라 걱정했는데 리눅스·네트워크 기초부터 순서대로 쌓아주셔서 따라갈 수 있었습니다. 실무 순서 그대로라는 게 뭔지 알겠더라고요."</p><div class="who">수료생 김OO 님 · 비전공 커리어 전환</div></div>
+      <div class="rev"><span class="cat">교강사 만족도</span><p>"현업에서 실제 사고를 다뤄본 분이 가르치니 설명의 깊이가 다릅니다. 질문하면 그 자리에서 화면 띄워서 보여주세요."</p><div class="who">수료생 박OO 님</div></div>
+      <div class="rev"><span class="cat">훈련환경·장비 만족도</span><p>"노트북까지 대여해주는 국비 과정은 처음이었어요. 지방 거주라 실시간 온라인이 아니었으면 시작도 못 했을 겁니다."</p><div class="who">수료생 이OO 님 · 비수도권 수강생</div></div>
+      <div class="rev"><span class="cat">프로젝트 만족도</span><p>"직접 취약점을 찾고 보고서까지 써보니 면접에서 할 말이 생겼습니다. 포트폴리오가 곧 실무 증거가 됐어요."</p><div class="who">수료생 최OO 님 · 보안 관제 취업</div></div>
+      <div class="rev"><span class="cat">수강생 관리 만족도</span><p>"진도가 늦어질 때 멘토님이 먼저 연락 주셨어요. 혼자 공부할 때랑 완주율이 다를 수밖에 없다고 느꼈습니다."</p><div class="who">수료생 정OO 님</div></div>
+      <div class="rev"><span class="cat">취업 지원 만족도</span><p>"수료 후에도 이력서 첨삭과 모의 면접을 받았습니다. 서류전형 우대가 실제로 체감되는 순간이 옵니다."</p><div class="who">수료생 오OO 님</div></div>
+    </div>
+    <p class="rev-note">* 수강생 인터뷰를 재구성한 내용으로, 개인 경험에 따라 다를 수 있습니다.</p>
+  </div>
+</section>
+
+<!-- ===================== 케어 4카드 (원본) ===================== -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">CARE SYSTEM</span>
+    <h2 class="sec-title">개강 전부터 수료 후까지,<br>혼자 두지 않습니다</h2>
+    <div class="care-grid">
+      <div class="care"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></div><h3>개강 전 온라인 학습 콘텐츠 제공</h3><ul><li>사전/보충 학습을 위한 맞춤형 VOD 콘텐츠</li><li>교육생 선발 이후 수료 전까지 상시 제공</li></ul></div>
+      <div class="care"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg></div><h3>현직자 및 커리어 코치와 소통</h3><ul><li>이스트소프트 현직자가 들려주는 현업 이야기</li><li>커리어 코치의 이력서 작성·면접 노하우</li></ul></div>
+      <div class="care"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg></div><h3>장비(웹캠) 및 학습 공간 지원</h3><ul><li>교육에 100% 몰입할 수 있는 지원 혜택</li><li>전국 어디서나 참여 가능</li></ul></div>
+      <div class="care"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-rocket"/></svg></div><h3>수료 후에도 이어지는 커리어 코칭</h3><ul><li>직무 특강과 취업 지원 프로그램</li><li>이력서 첨삭, 면접 특강, 모의 면접 등</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 함께 모집 중인 과정 ===================== -->
+<section id="courses" class="courses-sec">
+  <div class="wrap">
+    <span class="eyebrow">MORE COURSES</span>
+    <h2 class="sec-title">보안이 아니어도 괜찮습니다,<br>지금 함께 모집 중인 과정</h2>
+    <p class="sec-sub">이스트소프트 패밀리가 직접 운영하는 KDT 과정 — 상담에서 나에게 맞는 트랙을 함께 찾아드립니다.</p>
+    <div class="course-grid">
+
+      <article class="ccard">
+        <div class="ccard-head quant">
+          <span class="ctag">온/오프라인 혼합 · 강남</span>
+          <h3>AI 퀀트<small>퀀트 마스터 과정</small></h3>
+          <p>데이터 크롤링부터 포트폴리오 최적화까지,<br><b>포트폴리오로 증명하는 퀀트 마스터</b></p>
+        </div>
+        <div class="ccard-body">
+          <dl class="cinfo">
+            <div><dt>교육 기간</dt><dd>2026.08.10 ~ 2027.01.08</dd></div>
+            <div><dt>교육 시간</dt><dd>평일 09:00 ~ 18:00</dd></div>
+            <div><dt>교육 형태</dt><dd>온/오프라인 혼합 (강남)</dd></div>
+            <div><dt>지원 규모</dt><dd><s>1,452만 원 상당</s> 자기부담 최대 50만 원</dd></div>
+          </dl>
+          <ul class="cpoints">
+            <li><b>금융 380H + 인공지능 420H</b> — 두 축을 모두 잡는 커리큘럼</li>
+            <li>파이썬 금융 데이터 수집·전처리 → 시계열 분석 + 머신러닝·딥러닝</li>
+            <li>기술적 분석·자산배분 전략 수립, PineScript 전략 구현·백테스트</li>
+            <li>투자분석 프로젝트 3회 + 훈련장려금 약 150만 원(월 30만 원) + 인턴십 연계</li>
+          </ul>
+          <p class="cfoot">현직 퀀트 분석가의 학부 전공은 제각각입니다 — 전공보다 중요한 건 지금의 선택.</p>
+          <div class="cbtn-row"><a class="cbtn link" href="quant.html">과정 상세 보기 →</a><button class="cbtn" onclick="setCourse('AI 퀀트 (퀀트 마스터)')">바로 상담 신청</button></div>
+        </div>
+      </article>
+
+      <article class="ccard">
+        <div class="ccard-head human">
+          <span class="ctag">모집 마감 2026.08.10</span>
+          <h3>AI 휴먼<small>9기 · 인공지능사관학교</small></h3>
+          <p>살아있는 AI, 당신이 직접 만듭니다 —<br><b>이스트소프트 PERSO.ai 엔진 직접 활용</b></p>
+        </div>
+        <div class="ccard-body">
+          <dl class="cinfo">
+            <div><dt>모집 기간</dt><dd>~ 2026.08.10 (월) 23:59</dd></div>
+            <div><dt>교육 시간</dt><dd>평일 풀타임 과정</dd></div>
+            <div><dt>핵심 기술</dt><dd>PERSO.ai · Alan · AI Human Studio</dd></div>
+            <div><dt>지원 규모</dt><dd><s>1,452만 원 상당</s> 자기부담 50만 원 이내</dd></div>
+          </dl>
+          <ul class="cpoints">
+            <li>챗봇·이미지 생성은 이제 흔합니다 — <b>남들이 못 배우는 AI 휴먼이 필살기</b></li>
+            <li>머신러닝·딥러닝 → 자연어·음성 모델 개발 → LLM 자연어 생성</li>
+            <li>LangChain·RAG → <b>PERSO AI 파이널 프로젝트</b>로 완성</li>
+            <li>국내 유일 4K AI 버추얼 휴먼 제작 기술 + 훈련장려금 약 150만 원</li>
+          </ul>
+          <p class="cfoot">알집으로 시작해 세계가 인정한 이스트소프트 — 지자체·기업 도입이 완료된 실전 엔진입니다.</p>
+          <div class="cbtn-row"><a class="cbtn link" href="human.html">과정 상세 보기 →</a><button class="cbtn" onclick="setCourse('AI 휴먼 (9기)')">바로 상담 신청</button></div>
+        </div>
+      </article>
+
+    </div>
+    <p class="jd-note" style="margin-top:18px">* 세부 일정·자기부담금은 회차 공고 기준을 따릅니다. 상담 신청 시 과정별 최신 공고로 안내드립니다.</p>
+  </div>
+</section>
+
+<!-- ===================== 선발 절차 ===================== -->
+<section class="faq-wrap" id="process" style="padding-bottom:0;border-bottom:none">
+  <div class="wrap center">
+    <h2 class="sec-title">합격 발표까지<br>단 3영업일이면 충분합니다</h2>
+    <p class="sec-sub" style="margin-left:auto;margin-right:auto">선발 절차는 영업일 기준으로 진행됩니다. (주말·공휴일 제외)</p>
+    <div class="steps">
+      <div class="stp-card"><span class="no">STEP 1</span><h4>모집 페이지<br>간편 서류 접수</h4><p>지원서는 교육 의지와 열정을 확인하기 위한 최소한의 항목으로만 구성</p></div>
+      <div class="stp-card"><span class="no">STEP 2</span><h4>서류 접수 후 3영업일<br>이내 결과 안내</h4><p>합격자는 개별 안내드립니다</p></div>
+      <div class="stp-card"><span class="no">STEP 3</span><h4>내일배움카드 발급 및<br>고용24 수강신청</h4><p>카드 발급에 최대 1주일 소요 — 미리 발급을 추천드려요</p></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <dl class="ovlist apply-info">
+      <div class="ovrow"><dt>합격자 발표 안내</dt><dd>서류 접수 후 3일(영업일 기준) 개별 안내</dd></div>
+      <div class="ovrow"><dt>수강 신청 안내</dt><dd>사전에 내일배움카드를 발급 받고 고용24 수강 신청을 완료해야 합니다.<small>* 카드 발급에 최대 1주일 이상 소요될 수 있으니 미리 발급 받으시기 바랍니다. (고용 24: www.work24.go.kr / 발급 가능 여부는 고용노동부 1350 또는 거주지 관할 고용센터 확인)</small></dd></div>
+      <div class="ovrow"><dt>가디언즈 합류 안내</dt><dd>개강 1주일 전 교육생 온보딩 메일이 발송될 예정입니다.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ===================== FAQ (원본 실제 문항) ===================== -->
+<section class="faq-wrap" id="faq" style="border-top:none">
+  <div class="wrap">
+    <span class="eyebrow">FAQ</span>
+    <h2 class="sec-title">자주 묻는 질문</h2>
+    <div class="faq">
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [지원 및 선발]</span> 지원 자격이 있나요?</span><span class="arr">▾</span></button><div class="qa-a">국민내일배움카드를 보유했거나 발급 가능하고, 5년 이내 K-Digital Training 과정 수강 이력이 없으며, 평일 09:00~18:00 풀타임 교육 참여가 가능하면 지원할 수 있습니다. 졸업 예정자는 졸업까지 남은 수업 연한이 2년 이내여야 합니다. 카드 발급 가능 여부는 고용노동부 1350 또는 거주지 관할 고용센터에서 확인하실 수 있습니다.</div></div>
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [지원 및 선발]</span> 학교, 직장 등과 병행이 가능한가요?</span><span class="arr">▾</span></button><div class="qa-a">저희 과정은 평일 주 5일(공휴일 제외) 9:00~18:00 풀타임 강의로 진행되고 있습니다. 풀타임으로 온전히 참여하실 수 있는 분들을 우선 대상으로 선발하고 있으며, 학교/직장과 병행하더라도 수강시간 확보가 가능하신 경우에 교육 참여가 가능합니다.</div></div>
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [교육]</span> 사전 지식이 없는 비전공자도 수업을 따라갈 수 있을까요?</span><span class="arr">▾</span></button><div class="qa-a">저희는 사전 설문 내용을 토대로 지원자분들의 사전 지식을 고려하여 커리큘럼을 구성하고 있습니다. 기존 다수의 비전공자분들을 교육한 경험을 바탕으로 강사진과 운영진이 더욱 세심한 관리와 교육으로 여러분의 걱정을 덜어 드리겠습니다.</div></div>
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [출결]</span> 개인 일정으로 수업에 빠지게 되면 어떡하나요?</span><span class="arr">▾</span></button><div class="qa-a">병원 진료, 면접, 예비군 등의 사유로 수업에 빠질 때에는 증빙 서류 제출 시 출결정정이 가능합니다. 더불어 여러분의 학습을 위해 수업자료와 교안을 제공해 드리고, 강사진과 멘토진이 빠진 부분에 대해 놓치지 않고 수업진도를 따라갈 수 있도록 도와드립니다.</div></div>
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [신청]</span> 과정 신청 완료 후 절차가 어떻게 되나요?</span><span class="arr">▾</span></button><div class="qa-a">지원서 작성 후, 1~3일 이내에 순차적으로 유선 연락 드립니다. 다만, 신청서 내용이 부족하거나 지원 요건에 맞지 않을 경우 탈락될 수 있는 점 양해 부탁드립니다.</div></div>
+      <div class="qa"><button class="qa-q" onclick="toggleQa(this)"><span><span class="cat">Q. [지원 및 선발]</span> 다른 기관에서 교육을 받았는데 신청 가능할까요?</span><span class="arr">▾</span></button><div class="qa-a">최근 5년 이내 K-Digital Training 과정 수강 이력이 없다면 신청 가능합니다. 일반 국비 과정이나 자비 수강 이력은 무관하며, 본인의 KDT 이력 여부가 헷갈린다면 지원서를 먼저 남겨주세요. 상담에서 함께 확인해 드립니다.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 지원 폼 (코드잇식 초저마찰) ===================== -->
+<section id="apply">
+  <div class="wrap center">
+    <span class="eyebrow">APPLY</span>
+    <h2 class="sec-title">지원서 제출,<br>딱 2가지만 물어볼게요</h2>
+    <p class="sec-sub">이름과 연락처만 남기면 끝 — 나머지는 상담에서 함께 확인해요.<br>제출 후 <strong class="c">1~3일 이내</strong> 순차적으로 연락드립니다.</p>
+
+    <div class="form-card" style="text-align:left">
+      <form id="lead-form" novalidate>
+        <div class="f-group"><label>관심 과정</label>
+          <select name="course" id="course-select">
+            <option>인프라보안 14기 (정보보호 및 보안 인프라 운영 관리)</option>
+            <option>AI 퀀트 (퀀트 마스터)</option>
+            <option>AI 휴먼 (9기)</option>
+            <option>아직 못 정했어요 (상담으로 결정)</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <div class="f-group"><label>이름 <span class="req">*</span></label><input type="text" name="name" placeholder="홍길동" autocomplete="name"><p class="err">이름을 입력해 주세요.</p></div>
+          <div class="f-group"><label>연락처 <span class="req">*</span></label><input type="tel" name="phone" placeholder="010-1234-5678" autocomplete="tel" inputmode="tel"><p class="err">올바른 휴대폰 번호를 입력해 주세요.</p></div>
+        </div>
+
+        <div class="f-group"><label>지원 동기 한 줄 (선택)</label><input type="text" name="motive" placeholder="예) 보안 쪽으로 커리어를 바꾸고 싶어요" maxlength="100"><p class="err"></p></div>
+
+        <details class="more-fields">
+          <summary>선택 정보 미리 남기기 (합격 진행이 훨씬 빨라져요)</summary>
+          <div class="inner">
+            <div class="f-row">
+              <div class="f-group"><label>생년월일</label><input type="text" name="birth" placeholder="예) 1998-05-21" inputmode="numeric" maxlength="10"><p class="err">YYYY-MM-DD 형식으로 입력해 주세요.</p></div>
+              <div class="f-group"><label>이메일</label><input type="email" name="email" placeholder="guardian@example.com" autocomplete="email"><p class="err">이메일 형식을 확인해 주세요.</p></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label>최종 학력</label>
+                <select name="edu"><option value="">선택</option><option>고등학교 졸업</option><option>대학 재학</option><option>대학 휴학</option><option>대학 졸업 예정</option><option>대학 졸업 (2·3년제)</option><option>대학 졸업 (4년제)</option><option>대학원 재학/졸업</option></select>
+              </div>
+              <div class="f-group"><label>학과 (전공)</label><input type="text" name="major" placeholder="예) 컴퓨터공학과 / 해당 없음"></div>
+            </div>
+            <div class="f-row">
+              <div class="f-group"><label>내일배움카드 보유 여부</label>
+                <select name="card"><option value="">선택</option><option>보유</option><option>미보유 (발급 안내 필요)</option><option>잘 모르겠어요</option></select>
+              </div>
+              <div class="f-group"><label>상담 희망 시간대</label>
+                <select name="time"><option value="">선택</option><option>오전 (09~12시)</option><option>오후 (12~18시)</option><option>저녁 (18~21시)</option><option>아무 때나 가능</option></select>
+              </div>
+            </div>
+            <div class="f-group"><label>알게 된 경로</label>
+              <select name="channel"><option value="">선택</option><option>인스타그램</option><option>유튜브</option><option>검색 (네이버/구글)</option><option>지인 추천</option><option>커뮤니티/카페</option><option>기타</option></select>
+            </div>
+            <div class="f-group"><label>문의사항</label><textarea name="memo" placeholder="궁금한 점을 자유롭게 남겨주세요."></textarea></div>
+          </div>
+        </details>
+
+        <div class="consent">
+          <input type="checkbox" id="agree">
+          <label for="agree">(필수) 개인정보 수집·이용에 동의합니다. 수집 항목은 상담 목적에 한해 이용되며 목적 달성 후 파기됩니다. <a href="javascript:void(0)" onclick="togglePrivacy()">자세히 보기</a></label>
+        </div>
+        <div class="privacy-detail" id="privacy-detail">
+          <b>개인정보 수집·이용 안내</b><br>
+          · 수집 항목: 이름, 연락처, (선택) 생년월일, 이메일, 최종 학력, 학과, 내일배움카드 보유 여부, 상담 희망 시간대, 유입 경로, 지원 동기, 문의 내용<br>
+          · 제3자 제공: 교육 운영기관(이스트소프트 이스트캠프)에 수강 지원 목적으로 제공될 수 있습니다.<br>
+          · 수집 목적: 교육과정 상담 및 모집 안내<br>
+          · 보유 기간: 수집일로부터 1년 또는 동의 철회 시까지<br>
+          · 동의를 거부할 권리가 있으며, 거부 시 상담 신청이 제한될 수 있습니다.
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">14기 지원서 제출하기</button>
+        <p class="form-note"><svg class="i" style="width:13px;height:13px;color:#0FA968" aria-hidden="true"><use href="#i-lock"/></svg> 스펙과 관계 없이 지원서 내용만으로 선발합니다 · 동기 한 줄이 상담과 선발에 큰 힌트가 돼요</p>
+      </form>
+
+      <div class="form-done" id="form-done">
+        <div class="big"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg></div>
+        <h3>지원서가 접수되었습니다!</h3>
+        <p>1~3일 이내에 순차적으로 유선 연락드립니다.<br>가디언즈 14기에서 만나요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="f-brand">EST GUARDIANS · 이스트캠프</div>
+    <p>이스트소프트 이스트캠프 | K-디지털 트레이닝 · 가디언즈 정보보호 및 보안 인프라 운영 관리</p>
+    <p style="margin-top:6px">본 페이지는 모집 안내용이며, 세부 운영 사항은 기수별 공고 기준을 따릅니다.</p>
+  </div>
+</footer>
+
+<!-- ===================== 고정 요소 ===================== -->
+<button class="float-ask" onclick="goApply()"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg>문의하기</button>
+<div class="sticky-cta">
+  <div class="sticky-in">
+    <div class="info">
+      <div>모집 마감 <b id="countdown2">--:--:--</b></div>
+      <div class="t2">선발 80명 · 스펙 무관 · 서류 접수 후 3영업일 내 결과 안내</div>
+    </div>
+    <button class="sticky-btn" onclick="goApply()">지금 지원하기</button>
+  </div>
+</div>
+
+<!-- ===================== 관리자 패널 ===================== -->
+<div class="admin" id="admin">
+  <div class="admin-card">
+    <h3>리드 관리 <button onclick="closeAdmin()" aria-label="닫기">✕</button></h3>
+    <p class="a-stat" id="a-stat">-</p>
+    <div class="admin-tools">
+      <button class="a-btn primary" onclick="downloadXlsx()">⬇ 전체 엑셀(.xlsx)</button>
+      <button class="a-btn primary" style="background:#0FA968;border-color:#0FA968" onclick="downloadHandover()">⬆ 이스트소프트 제출용 엑셀</button>
+      <button class="a-btn" onclick="downloadCsv()">CSV 다운로드</button>
+      <button class="a-btn" onclick="resendPending()">↻ 미전송 건 시트 재전송</button>
+      <button class="a-btn danger" onclick="clearLeads()">전체 삭제</button>
+    </div>
+    <div class="a-tablewrap"><table class="a-table" id="a-table"></table></div>
+    <p style="margin-top:12px;font-size:12px;color:#5A6B7E">* 이 패널은 이 브라우저에 저장된 리드만 표시합니다. 구글 시트 연동 시 모든 기기의 리드가 시트에 실시간 적재됩니다. (열기: 주소 뒤 #admin 또는 Ctrl+Shift+L)</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   런타임
+   ============================================================ */
+const LS_KEY = "guardians14_leads";
+const $ = s => document.querySelector(s);
+
+/* 설정 반영 */
+const setHTML=(id,v)=>{const e=document.getElementById(id); if(e) e.innerHTML=v;};
+setHTML("ov-recruit", CONFIG.RECRUIT_TXT + '<small>* 선착순 접수 — 마감일 이전 조기 마감될 수 있습니다.</small>');
+setHTML("ov-course", CONFIG.COURSE_TXT);
+setHTML("ov-seats", (CONFIG.SEATS||"") && CONFIG.SEATS + "명");
+setHTML("cap-date", CONFIG.RECRUIT_TXT.replace("~ ",""));
+
+/* 카운트다운 */
+function tick(){
+  const diff = new Date(CONFIG.DEADLINE) - new Date();
+  if (diff <= 0){
+    ["cd-d","cd-h","cd-m","cd-s"].forEach(id=>$("#"+id).textContent="0");
+    $("#countdown2").textContent="모집 마감";
+    return;
+  }
+  const d = Math.floor(diff/864e5),
+        h = Math.floor(diff%864e5/36e5),
+        m = Math.floor(diff%36e5/6e4),
+        s = Math.floor(diff%6e4/1e3);
+  $("#cd-d").textContent = d;
+  $("#cd-h").textContent = String(h).padStart(2,"0");
+  $("#cd-m").textContent = String(m).padStart(2,"0");
+  $("#cd-s").textContent = String(s).padStart(2,"0");
+  $("#countdown2").textContent = `D-${d} ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+tick(); setInterval(tick,1000);
+
+/* 네비 탭 활성화 (스크롤 스파이) */
+const spy = [["curriculum",0],["jobs",0],["benefit",0],["process",0],["faq",0]];
+const tabLinks = document.querySelectorAll("#nav-tabs a");
+function onScroll(){
+  let cur = "";
+  spy.forEach(s=>{
+    const el = document.getElementById(s[0]);
+    if (el && el.getBoundingClientRect().top < 160) cur = s[0];
+  });
+  tabLinks.forEach(a=>a.classList.toggle("on", a.getAttribute("href") === "#"+cur));
+}
+document.addEventListener("scroll", onScroll, {passive:true});
+
+/* 인터랙션 */
+function toggleQa(btn){ btn.parentElement.classList.toggle('open'); }
+function togglePrivacy(){ $("#privacy-detail").classList.toggle('show'); }
+function goApply(){ $("#apply").scrollIntoView({behavior:'smooth'}); setTimeout(()=>{ const f=$("#lead-form input[name=name]"); if(f) f.focus({preventScroll:true}); }, 600); }
+
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ============================================================
+   리드 제출 → ① 로컬 백업 ② 구글 시트 웹훅
+   ============================================================ */
+function getLeads(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch(e){ return []; } }
+function saveLeads(a){ localStorage.setItem(LS_KEY, JSON.stringify(a)); }
+
+async function sendToSheet(lead){
+  if (!CONFIG.SHEETS_WEBHOOK_URL) return false;
+  try{
+    await fetch(CONFIG.SHEETS_WEBHOOK_URL, {
+      method:"POST", mode:"no-cors",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
+      body: new URLSearchParams(lead).toString()
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+$("#lead-form").addEventListener("submit", async function(ev){
+  ev.preventDefault();
+  const f = this;
+  const val = n => (f.elements[n] ? (f.elements[n].value||"").trim() : "");
+  let ok = true;
+
+  const gName = f.elements.name.closest(".f-group");
+  const nameOk = val("name").length >= 2;
+  gName.classList.toggle("invalid", !nameOk); ok = ok && nameOk;
+
+  const phone = val("phone").replace(/[^0-9]/g,"");
+  const gPhone = f.elements.phone.closest(".f-group");
+  const phoneOk = /^01[016789][0-9]{7,8}$/.test(phone);
+  gPhone.classList.toggle("invalid", !phoneOk); ok = ok && phoneOk;
+
+  const gMail = f.elements.email.closest(".f-group");
+  const mailOk = !val("email") || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val("email"));
+  gMail.classList.toggle("invalid", !mailOk); ok = ok && mailOk;
+
+  let birth = val("birth").replace(/[^0-9]/g,"");
+  if (birth.length === 8) birth = birth.replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
+  const gBirth = f.elements.birth.closest(".f-group");
+  const birthOk = !val("birth") || /^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(birth);
+  gBirth.classList.toggle("invalid", !birthOk); ok = ok && birthOk;
+  if (gBirth && !birthOk) gBirth.querySelector('.err').style.display = 'block';
+
+  if (!$("#agree").checked){ toast("개인정보 수집·이용에 동의해 주세요."); return; }
+  if (!ok){ toast("입력 내용을 다시 확인해 주세요."); return; }
+
+  const lead = {
+    timestamp: new Date().toLocaleString("ko-KR",{hour12:false}),
+    course: val("course") || "인프라보안 14기",
+    name: val("name"),
+    phone: phone.replace(/(\d{3})(\d{3,4})(\d{4})/,"$1-$2-$3"),
+    birth: birth,
+    email: val("email"), edu: val("edu"), major: val("major"),
+    card: val("card"), time: val("time"), channel: val("channel"),
+    motive: val("motive"), memo: val("memo"),
+    page: location.href
+  };
+
+  const btn = $("#submit-btn");
+  btn.disabled = true; btn.textContent = "제출 중...";
+
+  const synced = await sendToSheet(lead);
+  lead.synced = synced ? "Y" : (CONFIG.SHEETS_WEBHOOK_URL ? "N" : "-");
+  const arr = getLeads(); arr.push(lead); saveLeads(arr);
+
+  f.style.display = "none";
+  $("#form-done").style.display = "block";
+});
+
+/* ============================================================
+   관리자 패널 (#admin / Ctrl+Shift+L)
+   ============================================================ */
+const COLS = [["timestamp","접수일시"],["course","관심과정"],["name","훈련생명"],["birth","생년월일"],["phone","휴대전화"],["email","이메일"],["edu","최종 학력"],["major","학과"],["card","내일배움카드"],["time","상담희망시간"],["channel","유입경로"],["motive","지원동기"],["memo","문의사항"],["synced","시트전송"]];
+/* 이스트소프트 제출 양식 6열 (제출용 엑셀 버튼에서 사용) */
+const HANDOVER_COLS = [["name","훈련생명"],["birth","생년월일"],["phone","휴대전화"],["email","이메일"],["edu","최종 학력"],["major","학과"]];
+
+function openAdmin(){ renderAdmin(); $("#admin").classList.add("show"); }
+function closeAdmin(){ $("#admin").classList.remove("show"); if(location.hash==="#admin") history.replaceState(null,"",location.pathname+location.search); }
+window.addEventListener("hashchange", ()=>{ if(location.hash==="#admin") openAdmin(); });
+if (location.hash==="#admin") openAdmin();
+document.addEventListener("keydown", e=>{ if(e.ctrlKey&&e.shiftKey&&e.code==="KeyL"){ e.preventDefault(); openAdmin(); } });
+
+function renderAdmin(){
+  const leads = getLeads();
+  const pend = leads.filter(l=>l.synced==="N").length;
+  $("#a-stat").textContent = `총 ${leads.length}건 저장됨` + (CONFIG.SHEETS_WEBHOOK_URL ? ` · 시트 미전송 ${pend}건` : " · 구글 시트 미연동 (CONFIG에 웹훅 URL 입력 시 자동 적재)");
+  const t = $("#a-table");
+  t.innerHTML = "<tr>" + COLS.map(c=>`<th>${c[1]}</th>`).join("") + "</tr>" +
+    leads.slice().reverse().map(l=>"<tr>"+COLS.map(c=>{
+      let v = l[c[0]]||"";
+      if(c[0]==="synced") v = v==="Y" ? '<span class="ok">전송됨</span>' : (v==="N" ? '<span class="no">대기</span>' : "—");
+      return `<td>${v}</td>`;
+    }).join("")+"</tr>").join("");
+}
+
+async function resendPending(){
+  if(!CONFIG.SHEETS_WEBHOOK_URL){ toast("CONFIG에 웹훅 URL을 먼저 입력하세요."); return; }
+  const leads = getLeads(); let n = 0;
+  for (const l of leads){ if(l.synced==="N"){ if(await sendToSheet(l)){ l.synced="Y"; n++; } } }
+  saveLeads(leads); renderAdmin(); toast(`${n}건 재전송 완료`);
+}
+function clearLeads(){ if(confirm("이 브라우저에 저장된 리드를 모두 삭제할까요?")){ saveLeads([]); renderAdmin(); toast("삭제되었습니다."); } }
+
+function loadXLSX(){
+  return new Promise((res,rej)=>{
+    if (window.XLSX) return res();
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    s.onload = res; s.onerror = ()=>rej(new Error("load fail"));
+    document.head.appendChild(s);
+  });
+}
+async function downloadXlsx(){
+  const leads = getLeads();
+  if(!leads.length){ toast("저장된 리드가 없습니다."); return; }
+  try{
+    await loadXLSX();
+    const rows = leads.map(l=>{ const o={}; COLS.forEach(c=>o[c[1]]=l[c[0]]||""); return o; });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = COLS.map(c=>({wch: c[0]==="memo"?36 : c[0]==="timestamp"?21 : c[0]==="email"?24 : 14}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "리드");
+    XLSX.writeFile(wb, `가디언즈14기_리드_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }catch(e){ toast("엑셀 라이브러리 로드 실패 — CSV로 받아주세요."); }
+}
+async function downloadHandover(){
+  const leads = getLeads();
+  if(!leads.length){ toast("저장된 리드가 없습니다."); return; }
+  try{
+    await loadXLSX();
+    const rows = leads.map(l=>{ const o={}; HANDOVER_COLS.forEach(c=>o[c[1]]=l[c[0]]||""); return o; });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = [{wch:12},{wch:13},{wch:15},{wch:26},{wch:16},{wch:20}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "학생 정보");
+    XLSX.writeFile(wb, `가디언즈14기_학생정보_제출용_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }catch(e){ toast("엑셀 라이브러리 로드 실패 — CSV로 받아주세요."); }
+}
+function downloadCsv(){
+  const leads = getLeads();
+  if(!leads.length){ toast("저장된 리드가 없습니다."); return; }
+  const esc = v => `"${String(v||"").replace(/"/g,'""')}"`;
+  const csv = "\uFEFF" + COLS.map(c=>c[1]).join(",") + "\n" +
+    leads.map(l=>COLS.map(c=>esc(l[c[0]])).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download = `가디언즈14기_리드_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+/* ============================================================
+   V4 인터랙션 레이어
+   ============================================================ */
+document.documentElement.classList.add('js');
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* 티커 무한 루프용 복제 */
+(function(){ const t=$("#ticker-track"); if(t) t.innerHTML += t.innerHTML; })();
+
+/* 스크롤 프로그레스 바 */
+const prog = document.createElement('div'); prog.className='progress'; document.body.appendChild(prog);
+
+/* 스크롤 리빌: 대상 자동 태깅 + 스태거 */
+(function(){
+  if (REDUCE) return;
+  const singles = document.querySelectorAll('h2.sec-title,.sec-sub,.qnum,.eyebrow,.price-anchor,.stipend,.cmp-table,.jd-note,.rev-note,.curri-note');
+  singles.forEach(el=>el.setAttribute('data-rv',''));
+  const grids = ['.news-grid','.market-stats','.jd-grid','.term-grid','.field-grid','.why-grid','.grant-grid','.proj-grid','.job-grid','.care-grid','.rev-grid','.steps','.ovlist','.curri-flow','.faq'];
+  grids.forEach(sel=>document.querySelectorAll(sel).forEach(g=>{
+    [...g.children].forEach((ch,i)=>{ ch.setAttribute('data-rv',''); ch.style.transitionDelay=(Math.min(i,8)*70)+'ms'; });
+  }));
+  const io = new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  }),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('[data-rv]').forEach(el=>io.observe(el));
+})();
+
+/* 통계 카운트업 */
+(function(){
+  const els = document.querySelectorAll('[data-count]');
+  if(!els.length) return;
+  const fmt = n => n.toLocaleString('ko-KR');
+  const io = new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el=e.target, target=+el.dataset.count, suf=el.dataset.suffix||'';
+    if (REDUCE){ el.textContent = fmt(target)+suf; io.unobserve(el); return; }
+    const t0=performance.now(), dur=1300;
+    (function step(t){
+      const p=Math.min((t-t0)/dur,1), ease=1-Math.pow(1-p,3);
+      el.textContent = fmt(Math.round(target*ease))+suf;
+      if(p<1) requestAnimationFrame(step);
+    })(t0);
+    io.unobserve(el);
+  }),{threshold:.5});
+  els.forEach(el=>io.observe(el));
+})();
+
+/* 카운트다운 초 펄스 */
+(function(){
+  if (REDUCE) return;
+  const s=$("#cd-s"); if(!s) return;
+  new MutationObserver(()=>{ s.classList.remove('tick'); void s.offsetWidth; s.classList.add('tick'); })
+    .observe(s,{childList:true});
+})();
+
+/* 과정 카드 이동/선택 */
+function goCourse(which){ const el=$("#courses"); if(el) el.scrollIntoView({behavior:'smooth'}); }
+function setCourse(name){
+  const sel=$("#course-select");
+  if(sel){ [...sel.options].forEach(o=>{ if(o.text===name) sel.value=o.text; }); }
+  goApply(); toast(name+" 과정으로 상담을 신청합니다");
+}
+
+/* 네비 스크롤 상태 + 하단 CTA 등장/숨김 */
+(function(){
+  const nav=document.querySelector('.nav'), cta=document.querySelector('.sticky-cta'),
+        hero=document.querySelector('.hero'), apply=$("#apply");
+  function upd(){
+    const y=scrollY;
+    nav.classList.toggle('scrolled', y>10);
+    document.getElementById('subnav').classList.toggle('show', y > (hero ? hero.offsetHeight*0.5 : 300));
+    prog.style.width=(y/(document.documentElement.scrollHeight-innerHeight)*100)+'%';
+    const past = y > (hero ? hero.offsetHeight*0.6 : 400);
+    const nearForm = apply && apply.getBoundingClientRect().top < innerHeight*0.55;
+    cta.classList.toggle('show', past && !nearForm);
+  }
+  addEventListener('scroll',upd,{passive:true}); upd();
+})();
+
+/* FAQ 아코디언: 높이 애니메이션 */
+function toggleQa(btn){
+  const qa=btn.parentElement, a=qa.querySelector('.qa-a'), open=qa.classList.toggle('open');
+  a.style.maxHeight = open ? a.scrollHeight+40+'px' : '0px';
+}
+
+/* 연락처 실시간 하이픈 + 입력 유효 체크 표시 */
+(function(){
+  const ph=document.querySelector('input[name=phone]');
+  ph.addEventListener('input',()=>{
+    let v=ph.value.replace(/[^0-9]/g,'').slice(0,11);
+    if(v.length>7) v=v.replace(/(\d{3})(\d{3,4})(\d{4})/,'$1-$2-$3');
+    else if(v.length>3) v=v.replace(/(\d{3})(\d+)/,'$1-$2');
+    ph.value=v;
+    const g=ph.closest('.f-group');
+    g.classList.toggle('valid',/^010-\d{4}-\d{4}$|^01[16789]-\d{3,4}-\d{4}$/.test(v));
+    if(g.classList.contains('valid')) g.classList.remove('invalid');
+  });
+  const nm=document.querySelector('input[name=name]');
+  nm.addEventListener('input',()=>{ const g=nm.closest('.f-group'); g.classList.toggle('valid',nm.value.trim().length>=2); if(g.classList.contains('valid')) g.classList.remove('invalid'); });
+  const bi=document.querySelector('input[name=birth]');
+  bi.addEventListener('input',()=>{
+    let v=bi.value.replace(/[^0-9]/g,'').slice(0,8);
+    if(v.length>6) v=v.replace(/(\d{4})(\d{2})(\d+)/,'$1-$2-$3');
+    else if(v.length>4) v=v.replace(/(\d{4})(\d+)/,'$1-$2');
+    bi.value=v;
+  });
+})();
+
+/* 제출 버튼 스피너 */
+(function(){
+  const form=$("#lead-form"), btn=$("#submit-btn");
+  form.addEventListener('submit',()=>{ if($("#agree").checked) btn.classList.add('loading'); },true);
+  new MutationObserver(()=>{ if(form.style.display==='none') btn.classList.remove('loading'); })
+    .observe(form,{attributes:true,attributeFilter:['style']});
+})();
+</script>
+</body>
+</html>
